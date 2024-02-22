@@ -29,11 +29,10 @@
     },
     "updateContentCommand": {
       "apt_update": "sudo apt update && sudo apt -y upgrade",
-      // "venv_activate": "source ~/.env/bin/activate && echo '✅ Python virtual environment activated'",
-      "pip_inst_reqs": "python -m pip install --upgrade pip && python -m pip install -r requirements.txt && echo '✅ Packages installed and Requirements met'",
+      "pip_inst_reqs": "~/.env/bin/pip3 install --upgrade pip && ~/.env/bin/pip3 install -r requirements.txt && echo '✅ Packages installed and Requirements met'",
     },
     "postCreateCommand": {
-      "bashrc_update": "echo source ~/.env/bin/activate >> ~/.bashrc ; echo alias ll=\'ls -alF\' >> ~/.bashrc",
+      "bashrc_update": "chmod +x bashrc_update.sh && ./bashrc_update.sh",
     },
     // streamlit content :
     // "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
