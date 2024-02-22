@@ -10,7 +10,10 @@
         ]
       },
       "vscode": {
-        "settings": {},
+        "settings": {
+          "workbench.panel.defaultLocation": "right",
+          "notebook.lineNumbers": "on",
+        },
         "extensions": [
           "ms-python.python",
           "ms-python.vscode-pylance",
