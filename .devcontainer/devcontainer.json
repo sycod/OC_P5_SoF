@@ -32,7 +32,7 @@
       "pip_inst_reqs": "~/.env/bin/pip3 install --upgrade pip && ~/.env/bin/pip3 install -r requirements.txt && echo '✅ Packages installed and Requirements met'",
     },
     "postCreateCommand": {
-      "bashrc_update": "chmod +x bashrc_update.sh && ./bashrc_update.sh",
+      "bashrc_update": "chmod +x ./.devcontainer/bashrc_update.sh && ./.devcontainer/bashrc_update.sh",
     },
     // streamlit content :
     // "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
