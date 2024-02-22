@@ -5,10 +5,10 @@
 sudo apt update && sudo apt -y upgrade
 
 # activate Python virtual environment
-source ~/.env/Scripts/activate
+source ~/.env/bin/activate
 
 # update required packages
-pip install --upgrade pip && pip install -r requirements.txt
+python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
 # tell user it's done
 echo '✅ Packages installed and Requirements met'
