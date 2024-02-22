@@ -20,9 +20,9 @@
         ]
       }
     },
-    "onCreateCommand": "chmod+x .devcontainer/onCreateCommand.sh && ./.devcontainer/onCreateCommand.sh",
-    "updateContentCommand": "chmod+x .devcontainer/updateContentCommand.sh && ./.devcontainer/updateContentCommand.sh",
-    "postCreateCommand": "chmod+x .devcontainer/postCreateCommand.sh && ./.devcontainer/postCreateCommand.sh",
+    "onCreateCommand": "chmod +x .devcontainer/onCreateCommand.sh && ./.devcontainer/onCreateCommand.sh",
+    "updateContentCommand": "chmod +x .devcontainer/updateContentCommand.sh && ./.devcontainer/updateContentCommand.sh",
+    "postCreateCommand": "chmod +x .devcontainer/postCreateCommand.sh && ./.devcontainer/postCreateCommand.sh",
     // streamlit content :
     // "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
     // "postAttachCommand": {
