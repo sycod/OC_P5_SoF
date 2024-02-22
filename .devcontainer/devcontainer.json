@@ -29,7 +29,7 @@
     },
     "updateContentCommand": {
       "apt_update": "sudo apt update && sudo apt -y upgrade",
-      "venv_activate": "source ~/.env/bin/activate && echo '✅ Python virtual environment activated'",
+      // "venv_activate": "source ~/.env/bin/activate && echo '✅ Python virtual environment activated'",
       "pip_inst_reqs": "python -m pip install --upgrade pip && python -m pip install -r requirements.txt && echo '✅ Packages installed and Requirements met'",
     },
     "postCreateCommand": {
