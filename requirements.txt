@@ -1,9 +1,10 @@
 black           # PEP8 formatter
-# click           # CLI great interface
-# fastapi         # API
-# pylint          # great linter
-# pytest          # unit tests
-# pytest-cov      # unit tests, cover a specific function
-# pyyaml          # YAML support
-# uvicorn         # ASGI web server
-# mlflow
+click           # CLI great interface
+fastapi         # API
+pylint          # great linter
+pytest          # unit tests
+pytest-cov      # unit tests, cover a specific function
+pyyaml          # YAML support
+uvicorn         # ASGI web server
+mlflow
+scikit-learn
