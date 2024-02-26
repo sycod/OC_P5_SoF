@@ -21,3 +21,6 @@ all:
 # personal and not click-setup-installed commands
 api_launch:
 	python $(CURDIR)/blueprint_fast_api.py
+
+mlflow_run:
+	python mlflow_folder/my_mlf_script.py && mlflow ui

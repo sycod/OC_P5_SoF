@@ -7,7 +7,19 @@ from sklearn.datasets import load_diabetes
 from sklearn.ensemble import RandomForestRegressor
 
 
-def main():
+def main_manual():
+    client = mlflow.MlflowClient()
+
+    mlflow.log_param("threshold", 4)
+    mlflow.log_param("verbosity", "INFO")
+
+    mlflow.log_metric("ma_metrique", 666)
+    mlflow.log_metric("TimeToCompute", 1)
+
+    mlflow.log_artifact("my_artifact.csv")
+
+
+def main_autolog():
     mlflow.autolog()
 
     db = load_diabetes()
@@ -18,17 +30,7 @@ def main():
     rf.fit(X_train, y_train)
 
 
-
-    # client = mlflow.MlflowClient()
-
-    # mlflow.log_param("threshold", 4)
-    # mlflow.log_param("verbosity", "INFO")
-
-    # mlflow.log_metric("ma_metrique", 666)
-    # mlflow.log_metric("TimeToCompute", 1)
-
-    # mlflow.log_artifact("my_artifact.csv")
-
-
 if __name__ == '__main__':
-    main()
+    mlflow.start_run()
+    main_autolog()
+    mlflow.end_run()
