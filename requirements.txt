@@ -6,5 +6,7 @@ pytest          # unit tests
 pytest-cov      # unit tests, cover a specific function
 pyyaml          # YAML support
 uvicorn         # ASGI web server
-mlflow
-scikit-learn
+mlflow          # MLOps must-have for tracking experiments
+scikit-learn    # ML must-have library
+stackapi        # StackOverflow API
+notebook        # Jupyter notebook
