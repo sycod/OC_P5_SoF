@@ -1,4 +1,5 @@
 black           # PEP8 formatter
+black[jupyter]  # PEP8 formatter for Jupyter NB
 click           # CLI great interface
 fastapi         # API
 pylint          # great linter

@@ -12,7 +12,7 @@ test:
 
 format:
 	# --force-exclude '<FILE_OR_FOLDER>' if needed (env, imported, models...)
-	black *.py
+	black *.py *.ipynb
 
 all:
 	install lint test format
