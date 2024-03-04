@@ -8,14 +8,14 @@ import click
 @click.option('--verbose', '-v', is_flag=True, help="Print more output.")
 def pid(patient_id, verbose):
     """Displays information from a patient ID."""
-
-    print(f"Patient ID {patient_id}, verbose {'on' if verbose else 'off'}")
+    message = f"Patient ID {patient_id}, verbose {'on' if verbose else 'off'}"
+    return message
 
 
 def another_function():
     """Another function's help, to test API."""
 
-    print("Another function's print.")
+    return "Another function's print."
 
 
 if __name__ == "__main__":
