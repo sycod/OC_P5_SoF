@@ -1,6 +1,6 @@
 # MLOps template : todo
 
-- [] Github Actions  
+- [ ] Github Actions  
 - [x] MLFlow example
 
 If planning to use this MLOps template :
