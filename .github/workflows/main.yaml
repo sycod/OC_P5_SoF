@@ -1,7 +1,7 @@
-name: Sync to Hugging Face hub
+# name: Sync to Hugging Face hub
 # on:
-  # push:
-  #   branches: [main]
+#   push:
+#     branches: [main]
 
   # to run this workflow manually from the Actions tab
   # workflow_dispatch:
@@ -10,14 +10,23 @@ name: Sync to Hugging Face hub
   # sync-to-hub:
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v2
+  #     - uses: actions/checkout@v3
   #       with:
   #         fetch-depth: 0
+  #         lfs: true
+  #     - name: Check LFS
+  #       uses: ActionsDesk/lfs-warning@v2.0
+  #       with:
+  #         filesizelimit: 10485760 # this is 10MB so we can sync to HF Spaces
   #     - name: Add remote 
   #       env:
   #         HF: ${{ secrets.HF }}
   #       run: git remote add space https://noahgift:$HF@huggingface.co/spaces/noahgift/demo
   #     - name: Push to hub
   #       env:
-  #         HF: ${{ secrets.HF }}
+  #         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+  #       run: git push https://HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/HF_USERNAME/SPACE_NAME main
+  
+  #       example Noah:
   #       run: git push --force https://noahgift:$HF@huggingface.co/spaces/noahgift/demo main
+
