@@ -10,6 +10,8 @@ jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout repo
+        uses: actions/checkout@main
       - name: check-all
         run: make all
       # - uses: actions/checkout@v4
