@@ -2,7 +2,7 @@ install:
 	pip install --upgrade pip && pip install -r requirements.txt
 
 lint:
-	pylint --disable=R,C patient.py
+	pylint --disable=R,C *.py
 
 test:
 	# --cov=my_function test_*.py for details on a function
@@ -14,8 +14,7 @@ format:
 	# --force-exclude '<FILE_OR_FOLDER>' if needed (env, imported, models...)
 	black *.py *.ipynb
 
-all:
-	install lint test format
+all: install lint test format
 
 # personal and not click-setup-installed commands
 api_launch:
