@@ -10,6 +10,8 @@ pinned: false
 license: mit
 ---
 
+[![Test & sync to HF](https://github.com/sycod/container_test/actions/workflows/main.yaml/badge.svg)](https://github.com/sycod/container_test/actions/workflows/main.yaml)
+
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
 
 # MLOps template : todo
