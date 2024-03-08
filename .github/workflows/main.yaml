@@ -1,19 +1,51 @@
-name: Sync to Hugging Face hub
+name: Test & sync to HF
+
 on:
+  pull_request:
   push:
     branches: [main]
-
   # to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  sync-to-hub:
+  test-and-sync-to-hf-hub:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repo
-        uses: actions/checkout@main
-      - name: check-all
-        run: make all
+
+      - name: Checkout repository content
+        uses: actions/checkout@v4 # Checkout the repository content to github runner.
+
+      - name: Build and run dev container task
+        uses: devcontainers/ci@v0.3
+        with:
+          # Change this to be your CI task/script
+          runCmd:
+            make all
+
+      # - name: check-all
+      #   run: make all
+
+
+    
+
+  # sync-to-hub:
+  #   runs-on: ubuntu-latest
+    # - name: Setup Python Version
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: 3.11 # Install the python version needed
+
+    # - name: Install Python dependencies
+    #   run: python -m pip install --upgrade pip requests
+
+
+
+
+
+
+    #   - name: checkout repo
+    #     uses: actions/checkout@main
+        
       # - uses: actions/checkout@v4
       #   with:
       #     fetch-depth: 0
