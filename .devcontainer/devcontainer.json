@@ -15,11 +15,12 @@
           "notebook.lineNumbers": "on",
         },
         "extensions": [
-          "ms-python.python",
-          "ms-python.vscode-pylance",
-          "ms-python.pylint",
-          "GitHub.copilot",
-          "xelad0m.jupyter-toc"
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-python.pylint",
+            "GitHub.copilot",
+            "xelad0m.jupyter-toc",
+            "mhutchie.git-graph"
         ]
       }
     },
