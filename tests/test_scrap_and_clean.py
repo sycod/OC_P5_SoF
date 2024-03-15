@@ -22,3 +22,14 @@ def test_get_languages():
     assert "c++" in lang
     assert ".ql" in lang
     assert "zpl" in lang
+
+
+# 🚧 test rm_ending_punctuation
+    
+# 🚧 test exclude_words 
+# @pytest.mark.parametrize("string", ["excluded: c++ .ql c# <- are out"])
+# @pytest.mark.parametrize("exclude", ["c++", ".ql", "c#"])
+# def test_exclude_words(string, exclude):
+#     """Test src.scrap_and_clean exclude_words function"""
+
+#     assert exclude_words(string, exclude) == "excluded: <- are out"

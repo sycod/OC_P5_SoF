@@ -11,3 +11,4 @@ mlflow          # MLOps must-have for tracking experiments
 scikit-learn    # ML must-have library
 stackapi        # StackOverflow API
 notebook        # Jupyter notebook
+nltk            # Natural Language Toolkit

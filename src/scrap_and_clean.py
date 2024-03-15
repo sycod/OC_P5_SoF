@@ -88,6 +88,25 @@ def clean_string(string):
     return string
 
 
+def exclude_words(string, excluded):
+    """Return a string with excluded words removed"""
+    words = rm_ending_punctuation(string.split())
+    for w in words:
+        if w in excluded:
+            words.remove(w)
+    return " ".join(words)
+
+
+def rm_ending_punctuation(list):
+    """Return a list of strings without ending punctuation"""
+    return [re.sub(r'[.,;:]$', '', w) for w in list]
+
+
 if __name__ == "__main__":
-    print(f"\n👉 get_languages()\n{get_languages.__doc__}")
-    print(f"\n👉 clean_string(string, excluded=None)\n{clean_string.__doc__}")
+    # print(f"\n👉 get_languages()\n{get_languages.__doc__}")
+    # print(f"\n👉 clean_string(string, excluded=None)\n{clean_string.__doc__}")
+    # print(f"\n👉 exclude_words(string, excluded)\n{exclude_words.__doc__}")
+    s = "this is a test string. it contains some and and sometimes tags, newlines , uppercase words, suspension dots lonely numbers or and punctuation ; /*+ and multiple spaces and a+, c++, c# , .ql or even s programming langages"
+    excluded = ["c++", ".ql", "c#"]
+    r = exclude_words(s, excluded)
+    print(r)
