@@ -1,10 +1,14 @@
 """Test module for scrap_and_clean.py"""
 
 import pytest
-from src.scrap_and_clean import get_languages, clean_string
+from src.scrap_and_clean import get_languages
+from src.scrap_and_clean import clean_string
+from src.scrap_and_clean import rm_ending_punctuation
+from src.scrap_and_clean import exclude_words
 
 
 TEST_STRING = "This is a test string. It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags, \n newlines \n, UPPERCASE WORDS, suspension dots... lonely numbers 4 654  or 9142 and punctuation ; /*+ and     multiple    spaces  and a+, C++, C#, .QL or even S programming langages."
+
 
 @pytest.mark.parametrize("string", [TEST_STRING])
 def test_clean_string(string):
@@ -24,12 +28,14 @@ def test_get_languages():
     assert "zpl" in lang
 
 
-# 🚧 test rm_ending_punctuation
-    
-# 🚧 test exclude_words 
-# @pytest.mark.parametrize("string", ["excluded: c++ .ql c# <- are out"])
-# @pytest.mark.parametrize("exclude", ["c++", ".ql", "c#"])
-# def test_exclude_words(string, exclude):
-#     """Test src.scrap_and_clean exclude_words function"""
+def test_rm_ending_punctuation():
+    """Test src.scrap_and_clean rm_ending_punctuation function"""
+    assert rm_ending_punctuation(["word.", "word", "word;", "word,", "word:"]) == ["word", "word", "word", "word", "word"]
 
-#     assert exclude_words(string, exclude) == "excluded: <- are out"
+
+@pytest.mark.parametrize("string", [TEST_STRING])
+@pytest.mark.parametrize("excluded", [["c++", ".ql", "c#"]])
+def test_exclude_words(string, excluded):
+    """Test src.scrap_and_clean exclude_words function"""
+    assert exclude_words(string, excluded) == "This is a test string It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags newlines UPPERCASE WORDS suspension dots.. lonely numbers 4 654 or 9142 and punctuation /*+ and multiple spaces and a+ C++ C# .QL or even S programming langages"
+
