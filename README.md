@@ -10,12 +10,13 @@ pinned: false
 license: mit
 ---
 
-[![Test & sync to HF](https://github.com/sycod/OC_P5_SoF/actions/workflows/main.yaml/badge.svg?event=push)](https://github.com/sycod/OC_P5_SoF/actions/workflows/main.yaml)
+[![Linting](https://github.com/sycod/OC_P5_SoF/actions/workflows/linting.yaml/badge.svg)](https://github.com/sycod/OC_P5_SoF/actions/workflows/linting.yaml) 🔹 [![Testing](https://github.com/sycod/OC_P5_SoF/actions/workflows/testing.yaml/badge.svg)](https://github.com/sycod/OC_P5_SoF/actions/workflows/testing.yaml) 🔹 [![Build, install, lint, test and format](https://github.com/sycod/OC_P5_SoF/actions/workflows/main.yaml/badge.svg)](https://github.com/sycod/OC_P5_SoF/actions/workflows/main.yaml)
 
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
 
-# MLOps template : todo
+# TODO
 
 - [x] MLFlow example
+- [x] Github Actions  
 - [ ] Setup Hugging Face Space  
-- [ ] Github Actions  
+- [ ] Link HF with with GH Actions  
