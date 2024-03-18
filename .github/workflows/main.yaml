@@ -9,6 +9,9 @@ on:
 
 jobs:
   # test-and-sync-to-hf-hub:
+      # - name: Checkout repository content
+      #   uses: actions/checkout@v4 # Checkout the repository content to github runner.
+
       # - name: Build and run all dev container tests
       #   uses: devcontainers/ci@v0.3
       #   with:
@@ -16,7 +19,7 @@ jobs:
       #     runCmd:
       #       make all
 
-  build-and-install:
+  build_and_install:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository content
@@ -29,27 +32,28 @@ jobs:
             make install
   
   lint:
-    needs: build-and-install
+    needs: build_and_install
     runs-on: ubuntu-latest
     steps:
+      # - name: Checkout repository content
+      #   uses: actions/checkout@v4 # Checkout the repository content to github runner.
+
       - name: Lint dev container
-        uses: devcontainers/ci@v0.3
+        # uses: devcontainers/ci@v0.3
         with:
           runCmd:
             make lint
   
   test:
-    needs: build-and-install
+    needs: build_and_install
     runs-on: ubuntu-latest
     steps:
       - name: Test dev container
         uses: devcontainers/ci@v0.3
-        with:
-          runCmd:
-            make test
+        run: make test
  
   format:
-    needs: build-and-install
+    needs: build_and_install
     runs-on: ubuntu-latest
     steps:
       - name: Format dev container
