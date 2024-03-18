@@ -1,9 +1,7 @@
-name: Lint
+# Just to get separate GitHub badges for linting and testing
+name: Linting
 
 on:
-  pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:

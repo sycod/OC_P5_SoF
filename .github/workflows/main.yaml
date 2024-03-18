@@ -8,17 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # all_in_one:
-      # - name: Checkout repository content
-      #   uses: actions/checkout@v4 # Checkout the repository content to github runner.
-
-      # - name: Build and run all dev container tests
-      #   uses: devcontainers/ci@v0.3
-      #   with:
-      #     # cmds from inside container
-      #     runCmd:
-      #       make all
-
   install_lint_test_format:
     runs-on: ubuntu-latest
     steps:
@@ -48,3 +37,14 @@ jobs:
         with:
           runCmd:
             make format
+
+  # all_in_one:
+      # - name: Checkout repository content
+      #   uses: actions/checkout@v4 # Checkout the repository content to github runner.
+
+      # - name: Build and run all dev container tests
+      #   uses: devcontainers/ci@v0.3
+      #   with:
+      #     # cmds from inside container
+      #     runCmd:
+      #       make all

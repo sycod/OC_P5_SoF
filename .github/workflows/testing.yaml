@@ -1,0 +1,24 @@
+# Just to get separate GitHub badges for linting and testing
+name: Testing
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v4
+
+      - name: Build and install dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd:
+            make install
+            
+      - name: Test packages
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd:
+            make test
