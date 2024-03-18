@@ -1,4 +1,4 @@
-name: Test & sync to HF
+name: Install, lint, test and format
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # test-and-sync-to-hf-hub:
+  # all_in_one:
       # - name: Checkout repository content
       #   uses: actions/checkout@v4 # Checkout the repository content to github runner.
 
@@ -19,7 +19,7 @@ jobs:
       #     runCmd:
       #       make all
 
-  build_and_install:
+  install_lint_test_format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository content
@@ -30,60 +30,21 @@ jobs:
         with:
           runCmd:
             make install
-  
-  lint:
-    needs: build_and_install
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository content
-        uses: actions/checkout@v4 # Checkout the repository content to github runner.
-
-      - name: Lint dev container
+            
+      - name: Lint files
         uses: devcontainers/ci@v0.3
         with:
           runCmd:
             make lint
-  
-  test:
-    needs: build_and_install
-    runs-on: ubuntu-latest
-    steps:
-      - name: Test dev container
+
+      - name: Test packages
         uses: devcontainers/ci@v0.3
         with:
           runCmd:
             make test
- 
-  format:
-    needs: build_and_install
-    runs-on: ubuntu-latest
-    steps:
-      - name: Format dev container
+
+      - name: Format files
         uses: devcontainers/ci@v0.3
         with:
           runCmd:
             make format
-
-    #   - name: checkout repo
-    #     uses: actions/checkout@main
-        
-      # - uses: actions/checkout@v4
-      #   with:
-      #     fetch-depth: 0
-      #     lfs: true
-      # - name: Check LFS
-      #   uses: ActionsDesk/lfs-warning@v2.0
-      #   with:
-      #     filesizelimit: 10485760 # this is 10MB so we can sync to HF Spaces
-      # - name: Add remote
-      #   env:
-      #     HF: ${{ secrets.HF }}
-      #   run: git remote add space https://noahgift:$HF@huggingface.co/spaces/noahgift/demo
-      # - name: Push to hub
-      #   env:
-      #     HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      #   run: git push https://HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/HF_USERNAME/SPACE_NAME main
-  
-      #   example Noah:
-      #   run: git push --force https://noahgift:$HF@huggingface.co/spaces/noahgift/demo main
-

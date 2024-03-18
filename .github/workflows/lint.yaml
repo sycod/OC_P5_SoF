@@ -1,0 +1,26 @@
+name: Install and lint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  install_lint_test_format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v4
+
+      - name: Build and install dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd:
+            make install
+            
+      - name: Lint files
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd:
+            make lint
