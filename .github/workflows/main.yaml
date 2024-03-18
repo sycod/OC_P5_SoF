@@ -31,6 +31,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v4 # Checkout the repository content to github runner.
+        
       - name: Lint dev container
         uses: devcontainers/ci@v0.3
         with:
