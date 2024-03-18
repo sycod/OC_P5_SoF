@@ -40,10 +40,9 @@ jobs:
 
       - name: Lint dev container
         # uses: devcontainers/ci@v0.3
-        run: make test
-        # with:
-        #   runCmd:
-        #     make lint
+        with:
+          runCmd:
+            make lint
   
   test:
     needs: build_and_install
