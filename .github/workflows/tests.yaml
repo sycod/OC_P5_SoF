@@ -1,4 +1,4 @@
-name: Install and test
+name: Tests
 
 on:
   pull_request:
@@ -7,18 +7,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  install_lint_test_format:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository content
-        uses: actions/checkout@v4
+      # - name: Checkout repository content
+      #   uses: actions/checkout@v4
 
-      - name: Build and install dev container
-        uses: devcontainers/ci@v0.3
-        with:
-          runCmd:
-            make install
+      # - name: Build and install dev container
+      #   uses: devcontainers/ci@v0.3
+      #   with:
+      #     runCmd:
+      #       make install
             
+      - name: Build image
+        uses: ./.github/workflows/build.yaml
+      
       - name: Test packages
         uses: devcontainers/ci@v0.3
         with:

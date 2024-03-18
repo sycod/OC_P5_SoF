@@ -1,4 +1,4 @@
-name: Install and lint
+name: Lint
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  install_lint_test_format:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository content
