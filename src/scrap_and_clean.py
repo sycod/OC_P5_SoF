@@ -88,9 +88,9 @@ def clean_string(string):
     return string
 
 
-def rm_ending_punctuation(list):
+def rm_ending_punctuation(my_list):
     """Return a list of strings without ending punctuation"""
-    return [re.sub(r'[.,;:]$', '', w) for w in list]
+    return [re.sub(r'[.,;:]$', '', w) for w in my_list]
 
 
 def exclude_words(string, excluded):
