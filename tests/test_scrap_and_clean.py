@@ -5,6 +5,7 @@ from src.scrap_and_clean import get_languages
 from src.scrap_and_clean import clean_string
 from src.scrap_and_clean import rm_ending_punctuation
 from src.scrap_and_clean import exclude_words
+from src.scrap_and_clean import clean_hashes
 
 
 TEST_STRING = "This is a test string. It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags, \n newlines \n, UPPERCASE WORDS, suspension dots... lonely numbers 4 654  or 9142 and punctuation ; /*+ and     multiple    spaces  and a+, C++, C#, .QL or even S programming langages."
@@ -39,3 +40,9 @@ def test_exclude_words(string, excluded):
     """Test src.scrap_and_clean exclude_words function"""
     assert exclude_words(string, excluded) == "This is a test string It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags newlines UPPERCASE WORDS suspension dots.. lonely numbers 4 654 or 9142 and punctuation /*+ and multiple spaces and a+ C++ C# .QL or even S programming langages"
 
+
+@pytest.mark.parametrize("tokens", [["c", "#", "g", "#", "c++", ".ql", "s", "#"]])
+@pytest.mark.parametrize("watch_list", [["c++", ".ql", "c#"]])
+def test_clean_hashes(tokens, watch_list):
+    """Test src.scrap_and_clean clean_hashes function"""
+    assert clean_hashes(tokens, watch_list) == ["c#", "g", "#", "c++", ".ql", "s", "#"]

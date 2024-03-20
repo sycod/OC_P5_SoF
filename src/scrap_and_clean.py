@@ -44,7 +44,7 @@ def get_languages():
 
     parser = LangParser()
     parser.feed(scrap)
-    prog_langs = parser.data
+    prog_langs = list(parser.data)
     
     return prog_langs
 
@@ -104,8 +104,28 @@ def exclude_words(string, excluded):
     return " ".join(clean_words)
 
 
+def clean_hashes(tokens, watch_list):
+    """Return a list of tokens with hashes cleaned
+    (NLTK tokenizer issue with programming languages names containing hashes)
+    """
+
+    i_offset = 0
+    for i, t in enumerate(tokens):
+        i -= i_offset
+        if t == '#' and i > 0:
+            left = tokens[:i-1]
+            joined = [tokens[i - 1] + t]
+            right = tokens[i + 1:]
+            if joined[0] in watch_list:
+                tokens = left + joined + right
+                i_offset += 1
+    
+    return tokens
+
+
 if __name__ == "__main__":
     print(f"\n👉 get_languages()\n{get_languages.__doc__}")
     print(f"\n👉 clean_string(string, excluded=None)\n{clean_string.__doc__}")
     print(f"\n👉 rm_ending_punctuation(list)\n{rm_ending_punctuation.__doc__}")
     print(f"\n👉 exclude_words(string, excluded)\n{exclude_words.__doc__}")
+    print(f"\n👉 clean_hashes(tokens, watch_list)\n{clean_hashes.__doc__}")
