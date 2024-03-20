@@ -119,7 +119,7 @@ def clean_hashes(tokens, watch_list):
             if joined[0] in watch_list:
                 tokens = left + joined + right
                 i_offset += 1
-    
+
     return tokens
 
 
