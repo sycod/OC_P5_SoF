@@ -25,6 +25,9 @@
         ]
       }
     },
+    "features": {
+      "git-lfs": "latest"
+    },
     "onCreateCommand": {
       "apt_update": "sudo apt update && sudo apt -y upgrade",
       "venv_create": "python -m venv ~/.env",
