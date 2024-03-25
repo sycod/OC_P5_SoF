@@ -3,6 +3,7 @@
 import re
 import urllib.request, json 
 from html.parser import HTMLParser
+import nltk
 
 
 class LangParser(HTMLParser):
@@ -88,20 +89,20 @@ def clean_string(string):
     return string
 
 
-def rm_ending_punctuation(my_list):
-    """Return a list of strings without ending punctuation"""
-    return [re.sub(r'[.,;:]$', '', w) for w in my_list]
+# def rm_ending_punctuation(my_list):
+#     """Return a list of strings without ending punctuation"""
+#     return [re.sub(r'[.,;:]$', '', w) for w in my_list]
 
 
-def exclude_words(string, excluded):
-    """Return a string with excluded words removed"""
-    words = rm_ending_punctuation(string.split())
-    clean_words = words.copy()
-    for w in words:
-        if w in excluded or w == "":
-            clean_words.remove(w)
+# def exclude_words(string, excluded):
+#     """Return a string with excluded words removed"""
+#     words = rm_ending_punctuation(string.split())
+#     clean_words = words.copy()
+#     for w in words:
+#         if w in excluded or w == "":
+#             clean_words.remove(w)
 
-    return " ".join(clean_words)
+#     return " ".join(clean_words)
 
 
 def clean_hashes(tokens, watch_list):
@@ -123,9 +124,43 @@ def clean_hashes(tokens, watch_list):
     return tokens
 
 
+def clean_negation(tokens, excluded_list):
+    """Return a list of tokens with negations cleaned"""
+    i_offset = 0
+    for i, t in enumerate(tokens):
+        i -= i_offset
+        if t == "n't" and i > 0:
+            left = tokens[:i-1]
+            joined = [tokens[i - 1] + t]
+            right = tokens[i + 1:]
+            if joined[0] in excluded_list:
+                tokens = left + right
+                i_offset += 2
+
+    return tokens
+
+
+def tokenize_str(sentence, watch_list, excluded_list):
+    """Return a list of cleansed tokens from a string,  excluding some words"""
+    # tokenize except excluded words
+    tokens = nltk.word_tokenize(sentence)
+    # clean negations
+    tokens = clean_negation(tokens, excluded_list)
+    # remove hashes from watch list
+    tokens = clean_hashes(tokens, watch_list)
+    # remove 1-letter words apart from words appearing in watch_list
+    tokens_sup_1 = [t for t in tokens if len(t) > 1 or t in watch_list]
+    # remove remaining excluded words
+    tokens_sw = [t for t in tokens_sup_1 if t not in excluded_list]
+
+    return tokens_sw
+
+
 if __name__ == "__main__":
     print(f"\n👉 get_languages()\n{get_languages.__doc__}")
     print(f"\n👉 clean_string(string, excluded=None)\n{clean_string.__doc__}")
-    print(f"\n👉 rm_ending_punctuation(list)\n{rm_ending_punctuation.__doc__}")
-    print(f"\n👉 exclude_words(string, excluded)\n{exclude_words.__doc__}")
+    # print(f"\n👉 rm_ending_punctuation(list)\n{rm_ending_punctuation.__doc__}")
+    # print(f"\n👉 exclude_words(string, excluded)\n{exclude_words.__doc__}")
     print(f"\n👉 clean_hashes(tokens, watch_list)\n{clean_hashes.__doc__}")
+    print(f"\n👉 clean_negation(tokens, excluded_list)\n{clean_negation.__doc__}")
+    print(f"\n👉 tokenize_str(sentence, watch_list, excluded_list)\n{tokenize_str.__doc__}")
