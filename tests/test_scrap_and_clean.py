@@ -3,8 +3,8 @@
 import pytest
 from src.scrap_and_clean import get_languages
 from src.scrap_and_clean import clean_string
-from src.scrap_and_clean import rm_ending_punctuation
-from src.scrap_and_clean import exclude_words
+# from src.scrap_and_clean import rm_ending_punctuation
+# from src.scrap_and_clean import exclude_words
 from src.scrap_and_clean import clean_hashes
 
 
