@@ -4,6 +4,7 @@ import re
 import urllib.request, json 
 from html.parser import HTMLParser
 import nltk
+import emoji
 
 
 class LangParser(HTMLParser):
@@ -58,6 +59,8 @@ def clean_string(string):
     string = re.sub(r"<img.*?>", "", string)
     # remove all html tags
     string = re.sub(r"<.*?>", "", string)
+    # remove emojis
+    string = emoji.replace_emoji(string, replace=' ')
     # remove newlines
     string = re.sub(r"\n", " ", string)
     # lowercase
@@ -148,10 +151,20 @@ def tokenize_str(sentence, watch_list, excluded_list):
     tokens = clean_negation(tokens, excluded_list)
     # remove hashes from watch list
     tokens = clean_hashes(tokens, watch_list)
-    # remove 1-letter words apart from words appearing in watch_list
-    tokens_sup_1 = [t for t in tokens if len(t) > 1 or t in watch_list]
+    # remove (<= 2)-letter words apart from words appearing in watch_list
+    tokens_sup_1 = [t for t in tokens if len(t) > 2 or t in watch_list]
+    # remove "'" at the beginning of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    #  change to remove punctuation at the beginning and end of strings
+    tokens_noap = [t[1:] if t[0] == "'" else t for t in tokens_sup_1]
     # remove remaining excluded words
-    tokens_sw = [t for t in tokens_sup_1 if t not in excluded_list]
+    tokens_sw = [t for t in tokens_noap if t not in excluded_list]
 
     return tokens_sw
 
@@ -164,3 +177,4 @@ if __name__ == "__main__":
     print(f"\n👉 clean_hashes(tokens, watch_list)\n{clean_hashes.__doc__}")
     print(f"\n👉 clean_negation(tokens, excluded_list)\n{clean_negation.__doc__}")
     print(f"\n👉 tokenize_str(sentence, watch_list, excluded_list)\n{tokenize_str.__doc__}")
+    
