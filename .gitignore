@@ -164,3 +164,6 @@ mlruns/
 
 # Editors
 .vscode/
+
+# Data
+data/

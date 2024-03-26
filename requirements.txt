@@ -2,6 +2,7 @@ black           # PEP8 formatter
 black[jupyter]  # PEP8 formatter for Jupyter NB
 click           # CLI great interface
 dill            # Pickle alternative for data science
+python-dotenv   # Environment variables
 emoji           # Emoji support
 fastapi         # API
 pylint          # great linter
