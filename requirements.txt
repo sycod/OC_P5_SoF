@@ -1,6 +1,7 @@
 black           # PEP8 formatter
 black[jupyter]  # PEP8 formatter for Jupyter NB
 click           # CLI great interface
+dill            # Pickle alternative for data science
 fastapi         # API
 pylint          # great linter
 pytest          # unit tests
