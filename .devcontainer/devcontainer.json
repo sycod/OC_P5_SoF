@@ -6,7 +6,7 @@
         "openFiles": [
           // "Makefile",
           "1_EDA.ipynb",
-          "eda.py",
+          "src/eda.py",
         ]
       },
       "vscode": {
