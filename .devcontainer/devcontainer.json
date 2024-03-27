@@ -5,7 +5,8 @@
       "codespaces": {
         "openFiles": [
           // "Makefile",
-          "1_EDA.ipynb"
+          "1_EDA.ipynb",
+          "eda.py",
         ]
       },
       "vscode": {
