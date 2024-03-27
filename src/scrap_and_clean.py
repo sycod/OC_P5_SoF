@@ -33,7 +33,7 @@ class LangParser(HTMLParser):
                 self.data.add(data)
 
 
-def get_languages():
+def get_languages() -> list:
     """Return the list of programming languages from Wikipedia"""
     url = "https://en.wikipedia.org/w/api.php?action=parse&page=List_of_programming_languages&prop=text&format=json&disabletoc=1&formatversion=2"
     with urllib.request.urlopen(url) as response:
@@ -51,7 +51,7 @@ def get_languages():
     return prog_langs
 
 
-def clean_string(string):
+def clean_string(string) -> str:
     """Return a cleaned version of an input string"""
     # remove code tags
     string = re.sub(r"<code>.*?<\/code>", "", string, flags=re.S)
@@ -72,43 +72,10 @@ def clean_string(string):
     # remove multiple spaces
     string = re.sub(r" +", " ", string)
 
-    # 🚧 commented because seems pointless: leave it to the tokenizer
-    # keep only letters, digits, spaces and some useful characters
-    # string = re.sub(r"[^\w *'#+_.-]", " ", string)
-
-    # 🚧 commented because seems pointless and may add biases
-    # words = string.split()
-    # for w in words:
-    #     if excluded:
-    #         if w not in excluded:
-    #             # remove 1-letter words
-    #             if len(w) == 1:
-    #                 words.remove(w)
-    #             # remove points at the end of words
-    #             if len(w) > 1 and w[-1] == ".":
-    #                 words[words.index(w)] = w[:-1]
-    # string = " ".join(words)
-
     return string
 
 
-# def rm_ending_punctuation(my_list):
-#     """Return a list of strings without ending punctuation"""
-#     return [re.sub(r'[.,;:]$', '', w) for w in my_list]
-
-
-# def exclude_words(string, excluded):
-#     """Return a string with excluded words removed"""
-#     words = rm_ending_punctuation(string.split())
-#     clean_words = words.copy()
-#     for w in words:
-#         if w in excluded or w == "":
-#             clean_words.remove(w)
-
-#     return " ".join(clean_words)
-
-
-def clean_hashes(tokens, watch_list):
+def clean_hashes(tokens, watch_list) -> list:
     """Return a list of tokens with hashes cleaned
     (NLTK tokenizer issue with programming languages names containing hashes)
     """
@@ -127,7 +94,7 @@ def clean_hashes(tokens, watch_list):
     return tokens
 
 
-def clean_negation(tokens, excluded_list):
+def clean_negation(tokens, excluded_list) -> list:
     """Return a list of tokens with negations cleaned"""
     i_offset = 0
     for i, t in enumerate(tokens):
@@ -143,38 +110,78 @@ def clean_negation(tokens, excluded_list):
     return tokens
 
 
-def tokenize_str(sentence, watch_list, excluded_list):
+def trim_punct(tokens, punctuation, watch_list) -> list:
+    """Return a list of tokens with punctuation trimmed,
+    apart from words appearing in watch_list.
+    """
+
+    tokens_trimmed = []
+    for t in tokens:
+        if t[0] in punctuation and t not in watch_list and len(t) > 2:
+            # because many specific terms begin with a "." followed by a letter
+            if t[0] == "." and t[1] not in punctuation:
+                pass
+            if t[0] == "_" and t[1] == "_":
+                pass
+            else:
+                t = t[1:]
+        if t[-1] in punctuation and t not in watch_list and len(t) > 2:
+            t = t[:-1]
+        # second check for words starting with an apostrophe
+        if t[0] == "'" and t not in watch_list and len(t) > 2:
+            t = t[1:]
+        
+        tokens_trimmed.append(t)
+
+    return tokens_trimmed
+
+
+def splitter_cell(list_of_strings, char=str) -> list:
+    """Split a string from a list into a list of substrings using a delimiter"""
+    sub = []
+    for s in list_of_strings:
+        _ = list(filter(None, s.split(char)))
+        if len(_) > 0: sub.extend(_)
+
+    return sub
+
+
+def tokenize_str(sentence, watch_list, excluded_list, punctuation) -> list:
     """Return a list of cleansed tokens from a string,  excluding some words"""
     # tokenize except excluded words
     tokens = nltk.word_tokenize(sentence)
+
     # clean negations
     tokens = clean_negation(tokens, excluded_list)
+
     # remove hashes from watch list
     tokens = clean_hashes(tokens, watch_list)
-    # remove (<= 2)-letter words apart from words appearing in watch_list
-    tokens_sup_1 = [t for t in tokens if len(t) > 2 or t in watch_list]
-    # remove "'" at the beginning of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    #  change to remove punctuation at the beginning and end of strings
-    tokens_noap = [t[1:] if t[0] == "'" else t for t in tokens_sup_1]
-    # remove remaining excluded words
-    tokens_sw = [t for t in tokens_noap if t not in excluded_list]
 
-    return tokens_sw
+    # trim punctuation once
+    tokens_trimmed = trim_punct(tokens, punctuation, watch_list)
+
+    # split tokens with specific characters
+    tokens_split_back = splitter_cell(tokens_trimmed, "\\")
+    tokens_split_slash = splitter_cell(tokens_split_back, "/")
+    tokens_split_apo = splitter_cell(tokens_split_slash, "'")
+
+    # trim punctuation again
+    tokens_trim_again = trim_punct(tokens_split_apo, punctuation, watch_list)
+
+    # remove (< 3)-letter words apart from those appearing in watch_list
+    tokens_rm_inf3 = [t for t in tokens_trim_again if len(t) > 2 or t in watch_list]
+
+    # remove remaining excluded words
+    tokens_cleaned = [t for t in tokens_rm_inf3 if t not in excluded_list]
+
+    return tokens_cleaned
 
 
 if __name__ == "__main__":
-    print(f"\n👉 get_languages()\n{get_languages.__doc__}")
-    print(f"\n👉 clean_string(string, excluded=None)\n{clean_string.__doc__}")
-    # print(f"\n👉 rm_ending_punctuation(list)\n{rm_ending_punctuation.__doc__}")
-    # print(f"\n👉 exclude_words(string, excluded)\n{exclude_words.__doc__}")
-    print(f"\n👉 clean_hashes(tokens, watch_list)\n{clean_hashes.__doc__}")
-    print(f"\n👉 clean_negation(tokens, excluded_list)\n{clean_negation.__doc__}")
-    print(f"\n👉 tokenize_str(sentence, watch_list, excluded_list)\n{tokenize_str.__doc__}")
+    print(f"\n👉 get_languages() -> list\n{get_languages.__doc__}")
+    print(f"\n👉 clean_string(string, excluded=None) -> str\n{clean_string.__doc__}")
+    print(f"\n👉 clean_hashes(tokens, watch_list) -> list\n{clean_hashes.__doc__}")
+    print(f"\n👉 clean_negation(tokens, excluded_list) -> list\n{clean_negation.__doc__}")
+    print(f"\n👉 trim_punct(tokens, punctuation, watch_list) -> list\n{clean_negation.__doc__}")
+    print(f"\n👉 tokenize_str(sentence, watch_list, excluded_list, punctuation) -> list\n{tokenize_str.__doc__}")
     
