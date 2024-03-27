@@ -3,9 +3,11 @@
 import pytest
 from src.scrap_and_clean import get_languages
 from src.scrap_and_clean import clean_string
-# from src.scrap_and_clean import rm_ending_punctuation
-# from src.scrap_and_clean import exclude_words
 from src.scrap_and_clean import clean_hashes
+from src.scrap_and_clean import clean_negation
+from src.scrap_and_clean import trim_punct
+from src.scrap_and_clean import tokenize_str
+from src.scrap_and_clean import words_filter
 
 
 TEST_STRING = "This is a test string. It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags, \n newlines \n, UPPERCASE WORDS, suspension dots... lonely numbers 4 654  or 9142 and punctuation ; /*+ and     multiple    spaces  and a+, C++, C#, .QL or even S programming langages."
@@ -36,7 +38,8 @@ def test_clean_hashes(tokens, watch_list):
     assert clean_hashes(tokens, watch_list) == ["c#", "g", "#", "c++", ".ql", "s", "#"]
 
 
-# def clean_negation(tokens, excluded_list):
+# def clean_negation(tokens, excluded_list): -> list
 # def trim_punct(tokens, punctuation, watch_list) -> list:
 # def splitter_cell(list_of_strings, char=str) -> list:
-# def tokenize_str(sentence, watch_list, excluded_list, punctuation):
+# def tokenize_str(sentence, watch_list, excluded_list, punctuation): -> list
+# def words_filter(list, method, keep_list, exclude_list) -> None:
