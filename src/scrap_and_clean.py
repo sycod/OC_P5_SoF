@@ -200,7 +200,8 @@ if __name__ == "__main__":
     print(f"\n👉 clean_string(string, excluded=None) -> str\n{clean_string.__doc__}")
     print(f"\n👉 clean_hashes(tokens, keep_set) -> list\n{clean_hashes.__doc__}")
     print(f"\n👉 clean_negation(tokens, exclude_set) -> list\n{clean_negation.__doc__}")
-    print(f"\n👉 trim_punct(tokens, punctuation, keep_set) -> list\n{clean_negation.__doc__}")
+    print(f"\n👉 trim_punct(tokens, punctuation, keep_set) -> list\n{trim_punct.__doc__}")
+    print(f"\n👉 splitter_cell(list_of_strings, char=str) -> list\n{splitter_cell.__doc__}")
     print(f"\n👉 tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list\n{tokenize_str.__doc__}")
-    print(f"\n👉 words_filter(list, method, keep_set, exclude_set) -> None\n{tokenize_str.__doc__}")
+    print(f"\n👉 words_filter(list, method, keep_set, exclude_set) -> None\n{words_filter.__doc__}")
     
