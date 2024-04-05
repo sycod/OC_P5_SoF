@@ -177,12 +177,12 @@ def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
     return tokens_cleaned
 
 
-def words_filter(list, method, keep_set, exclude_set) -> tuple:
+def words_filter(words_list, method, keep_set, exclude_set) -> tuple:
     """Add or remove a list of words to the corpus:
     - if method is 'add', add them to necessary words and remove them from excluded words
     - if method is 'rm', add them to excluded words and remove them from necessary words
     """
-    for i in list:
+    for i in words_list:
         if method == "add":
             keep_set.add(i)
             exclude_set.discard(i)
