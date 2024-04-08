@@ -171,8 +171,11 @@ def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
     # remove (< 3)-letter words apart from those appearing in keep_set
     tokens_rm_inf3 = [t for t in tokens_trim_again if len(t) > 2 or t in keep_set]
 
+    # remove tokens containing absolutely no letter
+    tokens_rm_no_letter = list(filter(lambda s:any([c.isalnum() for c in s]), tokens_rm_inf3))
+
     # remove remaining excluded words
-    tokens_cleaned = [t for t in tokens_rm_inf3 if t not in exclude_set]
+    tokens_cleaned = [t for t in tokens_rm_no_letter if t not in exclude_set]
 
     return tokens_cleaned
 
