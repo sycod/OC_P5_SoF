@@ -12,12 +12,12 @@ def results_from_vec_matrix(vectorizer, X, n_max) -> dict:
     weights = np.sort(d)[::-1][: min(len(i), n_max)].tolist()
 
     # get corresponding indices
-    pred_indices = [i[np.argsort(-d)][: min(len(i), n_max)]]
+    pred_indices = i[np.argsort(-d)][: min(len(i), n_max)]
 
     # get corresponding words
-    preds = [vectorizer.get_feature_names_out()[x] for x in pred_indices[0]]
+    preds = [vectorizer.get_feature_names_out()[x] for x in pred_indices]
 
-    return dict(zip(preds, (weights, pred_indices)))
+    return list(zip(preds, weights, pred_indices))
 
 
 def get_lda_topics(model, feature_names, n_top_words) -> list:
