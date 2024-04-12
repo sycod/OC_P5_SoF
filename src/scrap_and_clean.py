@@ -68,7 +68,7 @@ def clean_string(string) -> str:
     # remove suspension points
     string = re.sub(r"\.\.\.", " ", string)
     # remove digits only tokens
-    string = re.sub(r"\b\d+\b", " ", string)
+    string = re.sub(r" \d+ ", " ", string)
     # remove multiple spaces
     string = re.sub(r" +", " ", string)
 
@@ -157,22 +157,25 @@ def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
     # remove hashes from watch list
     tokens = clean_hashes(tokens, keep_set)
 
-    # trim punctuation once
-    tokens_trimmed = trim_punct(tokens, punctuation, keep_set)
+    # # trim punctuation once
+    # tokens_trimmed = trim_punct(tokens, punctuation, keep_set)
 
-    # split tokens with specific characters
-    tokens_split_back = splitter_cell(tokens_trimmed, "\\")
-    tokens_split_slash = splitter_cell(tokens_split_back, "/")
-    tokens_split_apo = splitter_cell(tokens_split_slash, "'")
+    # # split tokens with specific characters
+    # tokens_split_back = splitter_cell(tokens_trimmed, "\\")
+    # tokens_split_slash = splitter_cell(tokens_split_back, "/")
+    # tokens_split_apo = splitter_cell(tokens_split_slash, "'")
 
-    # trim punctuation again
-    tokens_trim_again = trim_punct(tokens_split_apo, punctuation, keep_set)
+    # # trim punctuation again
+    # tokens_trim_again = trim_punct(tokens_split_apo, punctuation, keep_set)
 
     # remove (< 3)-letter words apart from those appearing in keep_set
-    tokens_rm_inf3 = [t for t in tokens_trim_again if len(t) > 2 or t in keep_set]
+    # tokens_rm_inf3 = [t for t in tokens_trim_again if len(t) > 2 or t in keep_set]
+
+    # remove (< 3)-letter words apart from those appearing in keep_set
+    tokens_rm_inf3 = [t for t in tokens if len(t) > 2 or t in keep_set]
 
     # remove tokens containing absolutely no letter
-    tokens_rm_no_letter = list(filter(lambda s:any([c.isalnum() for c in s]), tokens_rm_inf3))
+    tokens_rm_no_letter = list(filter(lambda s:any([c.isalpha() for c in s]), tokens_rm_inf3))
 
     # remove remaining excluded words
     tokens_cleaned = [t for t in tokens_rm_no_letter if t not in exclude_set]
@@ -198,6 +201,15 @@ def words_filter(words_list, method, keep_set, exclude_set) -> tuple:
     return keep_set, exclude_set
 
 
+def bowize_doc(document, keep_set, exclude_set, punctuation) -> str:
+    """Apply a sequence of words formatting actions on a document and returns a preprocessed string."""
+    doc_clean = clean_string(document)
+    doc_tokens = tokenize_str(doc_clean, keep_set, exclude_set, punctuation)
+    doc_preprocessed = " ".join(doc_tokens)
+
+    return doc_preprocessed
+
+
 if __name__ == "__main__":
     print(f"\n👉 get_languages() -> set\n{get_languages.__doc__}")
     print(f"\n👉 clean_string(string, excluded=None) -> str\n{clean_string.__doc__}")
@@ -206,5 +218,6 @@ if __name__ == "__main__":
     print(f"\n👉 trim_punct(tokens, punctuation, keep_set) -> list\n{trim_punct.__doc__}")
     print(f"\n👉 splitter_cell(list_of_strings, char=str) -> list\n{splitter_cell.__doc__}")
     print(f"\n👉 tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list\n{tokenize_str.__doc__}")
+    print(f"\n👉 words_filter(list, method, keep_set, exclude_set) -> None\n{words_filter.__doc__}")
     print(f"\n👉 words_filter(list, method, keep_set, exclude_set) -> None\n{words_filter.__doc__}")
     
