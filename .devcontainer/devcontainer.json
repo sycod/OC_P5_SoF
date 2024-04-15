@@ -4,9 +4,7 @@
     "customizations": {
       "codespaces": {
         "openFiles": [
-          // "Makefile",
-          "1_EDA.ipynb",
-          "src/eda.py",
+          "3_non_supervise.ipynb",
         ]
       },
       "vscode": {

@@ -68,7 +68,7 @@ def clean_string(string) -> str:
     # remove suspension points
     string = re.sub(r"\.\.\.", " ", string)
     # remove digits only tokens
-    string = re.sub(r" \d+ ", " ", string)
+    string = re.sub(r"\b(?<![0-9-])(\d+)(?![0-9-])\b", " ", string)
     # remove multiple spaces
     string = re.sub(r" +", " ", string)
 
