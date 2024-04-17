@@ -4,6 +4,8 @@ import time
 import numpy as np
 from Levenshtein import ratio
 from sklearn.manifold import TSNE
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.pyplot as plt
 from matplotlib import colors
 
@@ -100,6 +102,18 @@ def plot_model(model_score, scores, X_tsne) :
     axs[1].set_ylabel('Count')
 
     plt.show()
+
+
+def vect_data(data, vec_type="cv") -> np.ndarray:
+    """Vectorizes data with CountVectorizer or TfidfVectorizer"""
+    if vec_type == "cv":
+        vectorizer = CountVectorizer(token_pattern=r"\S+", dtype=np.uint16, min_df=10)
+    elif vec_type == "tfidf":
+        vectorizer = TfidfVectorizer(token_pattern=r"\S+", min_df=10)
+    else:
+        raise ValueError("Unknown vectorizer type (vec_type)")
+
+    return vectorizer.fit_transform(data)
 
 
 if __name__ == "__main__":
