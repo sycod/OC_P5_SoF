@@ -4,6 +4,8 @@ import time
 import numpy as np
 from Levenshtein import ratio
 from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+from matplotlib import colors
 
 
 def score_terms(pred_words, target_words, cutoff=0.7) -> float:
@@ -74,6 +76,30 @@ def get_lda_topics(model, feature_names, n_top_words) -> list:
         )
 
     return topics
+
+
+def plot_model(model_score, scores, X_tsne) :
+    """Scores & TSNE plotting """
+    fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
+
+    # T-SNE DATA
+    scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=scores, cmap='viridis')    
+    axs[0].set_title(f"T-SNE representation")
+
+    # SCORES
+    N, bins, patches = axs[1].hist(scores, bins=10)
+    # color by score (bin)
+    fracs = bins / bins.max()
+    norm = colors.Normalize(0, 1)
+    # loop through objects and set color of each
+    for thisfrac, thispatch in zip(fracs, patches):
+        color = plt.cm.viridis(norm(thisfrac))
+        thispatch.set_facecolor(color)
+    axs[1].set_title(f"Score: {model_score}")
+    axs[1].set_xlabel('Score')
+    axs[1].set_ylabel('Count')
+
+    plt.show()
 
 
 if __name__ == "__main__":
