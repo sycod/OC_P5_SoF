@@ -1,10 +1,20 @@
 """Utils for web scraping and data cleaning"""
 
-import re
+import os
+from dotenv import load_dotenv
+import dill as pickle
 import urllib.request, json 
+import pandas as pd
+import re
 from html.parser import HTMLParser
 import nltk
 import emoji
+import logging
+
+
+# logging configuration (see all outputs, even DEBUG or INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 class LangParser(HTMLParser):
@@ -31,6 +41,25 @@ class LangParser(HTMLParser):
                 # remove start & end white spaces + convert to lower case
                 data = data.strip().lower()
                 self.data.add(data)
+
+
+def init_raw_df() -> pd.DataFrame:
+    """Get initial data and return raw dataframe"""
+    load_dotenv()
+    DATA_URL = os.getenv("DATA_URL")
+    if not os.path.exists("data/data_raw.pkl"):
+        logging.info(f"Loading data from {DATA_URL}...")
+        df_raw = pd.read_csv(DATA_URL)
+        with open("data/data_raw.pkl", "wb") as f:
+            pickle.dump(df_raw, f)
+            logging.info(f"✅ Raw data saved")
+    else:
+        logging.info(f"Loading data from local file...")
+        with open("data/data_raw.pkl", "rb") as f:
+            df_raw = pickle.load(f)
+            logging.info(f"✅ Raw data loaded")
+
+    return df_raw
 
 
 def get_languages() -> set:
@@ -196,12 +225,12 @@ def words_filter(words_list, method, keep_set, exclude_set) -> tuple:
             keep_set.discard(i)
             exclude_set.add(i)
         else:
-            print("Method should be 'add' or 'rm'")
+            logging.warning("Method should be 'add' or 'rm'")
 
     return keep_set, exclude_set
 
 
-def bowize_doc(document, keep_set, exclude_set, punctuation) -> str:
+def preprocess_doc(document, keep_set, exclude_set, punctuation) -> str:
     """Apply a sequence of words formatting actions on a document and returns a preprocessed string."""
     doc_clean = clean_string(document)
     doc_tokens = tokenize_str(doc_clean, keep_set, exclude_set, punctuation)
@@ -210,14 +239,157 @@ def bowize_doc(document, keep_set, exclude_set, punctuation) -> str:
     return doc_preprocessed
 
 
+def preprocess_data(df_raw) -> tuple:
+    """Return a preprocessed dataframe from a raw dataframe"""
+    df = df_raw.copy()
+
+    PUNCTUATION = [
+        "'",
+        '"',
+        ",",
+        ".",
+        ";",
+        ":",
+        "?",
+        "!",
+        "+",
+        "..",
+        "''",
+        "``",
+        "||",
+        "\\\\",
+        "\\",
+        "==",
+        "+=",
+        "-=",
+        "-",
+        "_",
+        "=",
+        "(",
+        ")",
+        "[",
+        "]",
+        "{",
+        "}",
+        "<",
+        ">",
+        "/",
+        "|",
+        "&",
+        "*",
+        "%",
+        "$",
+        "#",
+        "@",
+        "`",
+        "^",
+        "~",
+    ]
+
+    EXCLUDED_TERMS = [
+        "can't",
+        "d'oh",
+        "could't",
+        "could'nt",
+        "cound't",
+        "cound'nt",
+        "coulnd't",
+        "cdn'ed",
+        "doesn'it",
+        "does't",
+        "don'ts",
+        "n't",
+        "'nt",
+        "i'ca",
+        "i'ts",
+        "should't",
+        "want",
+        "would",
+        "would't",
+        "might't",
+        "must't",
+        "need't",
+        "n'th",
+        "wont't",
+        "non",
+        "no",
+        "use",
+        "using",
+        "usage",
+        "code",
+        "like",
+        "issue",
+        "error",
+        "file",
+        "files",
+        "run",
+        "runs",
+        "create",
+        "created",
+        'between',
+        't',
+        'any',
+        'using',
+        'this',
+        'out',
+        'm',
+        'file',
+        'each',
+        's',
+        "'ve",
+    ]
+
+    # KEPT TOKENS SET
+    # tags
+    df["Tags"] = df["Tags"].apply(lambda x: x[1:-1].split("><")[:5])
+    tags = set()
+    df["Tags"].apply(lambda x: tags.update(set(x)))
+    # programming languages
+    prog_lang = get_languages()
+    # all together
+    keep_set = prog_lang | tags
+    # add some specific terms
+    add_spec_terms = ["qt", "d3", "hoa", "kde", "s+", "hy", "d"]
+    keep_set |= set(add_spec_terms)
+
+    # EXCLUDED TOKENS SET
+    nltk.download('stopwords')  # downloaded just once, either checks update
+    exclude_set = set(nltk.corpus.stopwords.words("english"))
+    exclude_set |= set(PUNCTUATION)
+    exclude_set |= set(EXCLUDED_TERMS)
+
+    # PREPROCESSING
+    # titles
+    df["title_bow"] = df["Title"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set, PUNCTUATION))
+    # bodies
+    df["body_bow"] = df["Body"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set, PUNCTUATION))
+    df = df.loc[
+        (df["title_bow"].apply(lambda x: x.strip() != ""))
+        | (df["body_bow"].apply(lambda x: x.strip() != "")),
+    ]
+    # corpus
+    df["doc_bow"] = df["title_bow"] + " " + df["body_bow"]
+
+    return df
+
+
+def init_data():
+    """Get preprocessed data from file or retrieve raw data and preprocess it"""
+    if os.path.exists("data/data_preprocessed.pkl"):
+        with open("data/data_preprocessed.pkl", "rb") as f:
+            df_pp = pickle.load(f)
+            logging.info(f"✅ Preprocessed data loaded")
+    else:
+        df_raw = init_raw_df()
+        logging.info(f"Preprocessing raw data...")
+        df_pp = preprocess_data(df_raw)
+        with open("data/data_preprocessed.pkl", "wb") as f:
+            pickle.dump(df_pp, f)
+            logging.info(f"✅ Preprocessed data saved")
+
+    return df_pp
+
+
 if __name__ == "__main__":
-    print(f"\n👉 get_languages() -> set\n{get_languages.__doc__}")
-    print(f"\n👉 clean_string(string, excluded=None) -> str\n{clean_string.__doc__}")
-    print(f"\n👉 clean_hashes(tokens, keep_set) -> list\n{clean_hashes.__doc__}")
-    print(f"\n👉 clean_negation(tokens, exclude_set) -> list\n{clean_negation.__doc__}")
-    print(f"\n👉 trim_punct(tokens, punctuation, keep_set) -> list\n{trim_punct.__doc__}")
-    print(f"\n👉 splitter_cell(list_of_strings, char=str) -> list\n{splitter_cell.__doc__}")
-    print(f"\n👉 tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list\n{tokenize_str.__doc__}")
-    print(f"\n👉 words_filter(list, method, keep_set, exclude_set) -> None\n{words_filter.__doc__}")
-    print(f"\n👉 words_filter(list, method, keep_set, exclude_set) -> None\n{words_filter.__doc__}")
+    help()
     

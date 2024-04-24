@@ -48,13 +48,13 @@ def get_5_tags_from_matrix(words_list, X, n_max=5) -> list:
     return preds
 
 
-def lda_weights_df(lda_model, cv_names, n_top_words=10) -> pd.DataFrame:
+def topic_weights_df(topic_model, cv_names, n_top_words=10) -> pd.DataFrame:
     """Return a dataframe of n top words with weights, for each LDA topic"""
     # get best 10 words for each topic, with weights
     dfs_list = []
-    for i, t in enumerate(lda_model.components_):
-        weights = sorted(lda_model.components_[i], reverse=True)[:n_top_words]
-        indices = lda_model.components_[i].argsort()[:-n_top_words - 1:-1]
+    for i, t in enumerate(topic_model.components_):
+        weights = sorted(topic_model.components_[i], reverse=True)[:n_top_words]
+        indices = topic_model.components_[i].argsort()[:-n_top_words - 1:-1]
         words = [cv_names[w] for w in indices]
 
         # all in a dataframe
@@ -72,7 +72,7 @@ def lda_weights_df(lda_model, cv_names, n_top_words=10) -> pd.DataFrame:
     return ldaword_weights
 
 
-def lda_predict(df, X, n_top_topics=10) -> tuple:
+def topic_predict(df, X, n_top_topics=10) -> tuple:
     """Return transformed model predictions and weights from a fitted model and transformed features"""
 
     # get the n top topics
@@ -103,9 +103,9 @@ def score_reduce(words_list, X, y, n_groups=5, model=None, model_type=None) -> t
     start_time = time.time()
 
     # get scores from results
-    if model_type == "lda":
-        lda_df = lda_weights_df(model, words_list)
-        X_results = [lda_predict(lda_df, xi)[1] for xi in X]
+    if model_type == "topic":
+        topic_df = topic_weights_df(model, words_list)
+        X_results = [topic_predict(topic_df, xi)[1] for xi in X]
     else:
         X_results = [get_5_tags_from_matrix(words_list, xi) for xi in X]
     scores = [score_terms(p_w, y[i].split(" ")) for i, p_w in enumerate(X_results)]
@@ -122,7 +122,7 @@ def score_reduce(words_list, X, y, n_groups=5, model=None, model_type=None) -> t
     return model_score, X_results, scores, X_tsne
 
 
-def get_lda_topics(model, feature_names, n_top_words) -> list:
+def get_topics(model, feature_names, n_top_words) -> list:
     """Display the topics of a LDA model."""
     topics = []
     for topic in model.components_:
