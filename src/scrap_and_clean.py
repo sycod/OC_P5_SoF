@@ -139,40 +139,40 @@ def clean_negation(tokens, exclude_set) -> list:
     return tokens
 
 
-def trim_punct(tokens, punctuation, keep_set) -> list:
-    """Return a list of tokens with punctuation trimmed,
-    apart from words appearing in keep_set.
-    """
+# def trim_punct(tokens, punctuation, keep_set) -> list:
+#     """Return a list of tokens with punctuation trimmed,
+#     apart from words appearing in keep_set.
+#     """
 
-    tokens_trimmed = []
-    for t in tokens:
-        if t[0] in punctuation and t not in keep_set and len(t) > 2:
-            # because many specific terms begin with a "." followed by a letter
-            if t[0] == "." and t[1] not in punctuation:
-                pass
-            if t[0] == "_" and t[1] == "_":
-                pass
-            else:
-                t = t[1:]
-        if t[-1] in punctuation and t not in keep_set and len(t) > 2:
-            t = t[:-1]
-        # second check for words starting with an apostrophe
-        if t[0] == "'" and t not in keep_set and len(t) > 2:
-            t = t[1:]
+#     tokens_trimmed = []
+#     for t in tokens:
+#         if t[0] in punctuation and t not in keep_set and len(t) > 2:
+#             # because many specific terms begin with a "." followed by a letter
+#             if t[0] == "." and t[1] not in punctuation:
+#                 pass
+#             if t[0] == "_" and t[1] == "_":
+#                 pass
+#             else:
+#                 t = t[1:]
+#         if t[-1] in punctuation and t not in keep_set and len(t) > 2:
+#             t = t[:-1]
+#         # second check for words starting with an apostrophe
+#         if t[0] == "'" and t not in keep_set and len(t) > 2:
+#             t = t[1:]
         
-        tokens_trimmed.append(t)
+#         tokens_trimmed.append(t)
 
-    return tokens_trimmed
+#     return tokens_trimmed
 
 
-def splitter_cell(list_of_strings, char=str) -> list:
-    """Split a string from a list into a list of substrings using a delimiter"""
-    sub = []
-    for s in list_of_strings:
-        _ = list(filter(None, s.split(char)))
-        if len(_) > 0: sub.extend(_)
+# def splitter_cell(list_of_strings, char=str) -> list:
+#     """Split a string from a list into a list of substrings using a delimiter"""
+#     sub = []
+#     for s in list_of_strings:
+#         _ = list(filter(None, s.split(char)))
+#         if len(_) > 0: sub.extend(_)
 
-    return sub
+#     return sub
 
 
 def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
@@ -212,6 +212,22 @@ def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
     return tokens_cleaned
 
 
+def lemmatize_tokens(tokens_list, keep_set, exclude_set) -> list:
+    """Return lemmatized tokens from a tokens list, on conditions"""
+    kilmister = nltk.wordnet.WordNetLemmatizer()
+    lem_tok_list = []
+
+    for token in tokens_list:
+        if token in keep_set:
+            lem_tok_list.append(token)
+        else:
+            lem_tok = kilmister.lemmatize(token)
+            if lem_tok not in exclude_set:
+                lem_tok_list.append(lem_tok)
+
+    return lem_tok_list
+
+
 def words_filter(words_list, method, keep_set, exclude_set) -> tuple:
     """Add or remove a list of words to the corpus:
     - if method is 'add', add them to necessary words and remove them from excluded words
@@ -234,12 +250,13 @@ def preprocess_doc(document, keep_set, exclude_set, punctuation) -> str:
     """Apply a sequence of words formatting actions on a document and returns a preprocessed string."""
     doc_clean = clean_string(document)
     doc_tokens = tokenize_str(doc_clean, keep_set, exclude_set, punctuation)
-    doc_preprocessed = " ".join(doc_tokens)
+    doc_lemmed = lemmatize_tokens(doc_tokens, keep_set, exclude_set)
+    doc_preprocessed = " ".join(doc_lemmed)
 
     return doc_preprocessed
 
 
-def preprocess_data(df_raw) -> tuple:
+def preprocess_data(df_raw) -> pd.DataFrame:
     """Return a preprocessed dataframe from a raw dataframe"""
     df = df_raw.copy()
 
@@ -363,6 +380,7 @@ def preprocess_data(df_raw) -> tuple:
     df["title_bow"] = df["Title"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set, PUNCTUATION))
     # bodies
     df["body_bow"] = df["Body"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set, PUNCTUATION))
+    # suppression des lignes vides
     df = df.loc[
         (df["title_bow"].apply(lambda x: x.strip() != ""))
         | (df["body_bow"].apply(lambda x: x.strip() != "")),

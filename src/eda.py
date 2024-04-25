@@ -22,23 +22,6 @@ def make_autopct(values) -> str:
     return my_autopct
 
 
-def create_df(cols, len_df, int_dtype) -> pd.DataFrame:
-    """Create a DataFrame filled with zeros from a list of columns, length and int type."""
-    return pd.DataFrame(
-        np.zeros((len_df, len(cols)), dtype=int_dtype),
-        index=np.arange(len_df),
-        columns=cols,
-    )
-
-
-def count_occurrences(x, df, column) -> int:
-    """Count the number of occurrences of x in the column of a dataframe.
-    ⚠️ Overflow: for memory optimization, returns a uint16 (0- 65535).
-    """
-    
-    return df[column].apply(lambda l: np.uint16(l.count(x)))
-
-
 def make_stat_df(words_list, name, verbose=True) -> pd.DataFrame:
     """Create a DataFrame with token count and frequency for a given list of words."""
     count_vectorizer = CountVectorizer(token_pattern=r"\S+", dtype=np.uint16)
@@ -61,7 +44,4 @@ def make_stat_df(words_list, name, verbose=True) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    print(f"\n👉 make_autopct(values) -> str\n{make_autopct.__doc__}")
-    print(f"\n👉 create_df(cols, len_df, int_dtype) -> pd.DataFrame\n{create_df.__doc__}")
-    print(f"\n👉 count_occurrences(x, df, column) -> int\n{count_occurrences.__doc__}")
-    print(f"\n👉 make_stat_df(words_list, name, verbose=True) -> pd.DataFrame\n{make_stat_df.__doc__}")
+    help()
