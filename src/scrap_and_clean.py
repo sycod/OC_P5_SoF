@@ -123,82 +123,13 @@ def clean_hashes(tokens, keep_set) -> list:
     return tokens
 
 
-def clean_negation(tokens, exclude_set) -> list:
-    """Return a list of tokens with negations cleaned"""
-    i_offset = 0
-    for i, t in enumerate(tokens):
-        i -= i_offset
-        if t == "n't" and i > 0:
-            left = tokens[:i-1]
-            joined = [tokens[i - 1] + t]
-            right = tokens[i + 1:]
-            if joined[0] in exclude_set:
-                tokens = left + right
-                i_offset += 2
-
-    return tokens
-
-
-# def trim_punct(tokens, punctuation, keep_set) -> list:
-#     """Return a list of tokens with punctuation trimmed,
-#     apart from words appearing in keep_set.
-#     """
-
-#     tokens_trimmed = []
-#     for t in tokens:
-#         if t[0] in punctuation and t not in keep_set and len(t) > 2:
-#             # because many specific terms begin with a "." followed by a letter
-#             if t[0] == "." and t[1] not in punctuation:
-#                 pass
-#             if t[0] == "_" and t[1] == "_":
-#                 pass
-#             else:
-#                 t = t[1:]
-#         if t[-1] in punctuation and t not in keep_set and len(t) > 2:
-#             t = t[:-1]
-#         # second check for words starting with an apostrophe
-#         if t[0] == "'" and t not in keep_set and len(t) > 2:
-#             t = t[1:]
-        
-#         tokens_trimmed.append(t)
-
-#     return tokens_trimmed
-
-
-# def splitter_cell(list_of_strings, char=str) -> list:
-#     """Split a string from a list into a list of substrings using a delimiter"""
-#     sub = []
-#     for s in list_of_strings:
-#         _ = list(filter(None, s.split(char)))
-#         if len(_) > 0: sub.extend(_)
-
-#     return sub
-
-
 def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
     """Return a list of cleansed tokens from a string,  excluding some words"""
     # tokenize except excluded words
     tokens = nltk.word_tokenize(sentence)
 
-    # clean negations
-    tokens = clean_negation(tokens, exclude_set)
-
     # remove hashes from watch list
     tokens = clean_hashes(tokens, keep_set)
-
-    # # trim punctuation once
-    # tokens_trimmed = trim_punct(tokens, punctuation, keep_set)
-
-    # # split tokens with specific characters
-    # tokens_split_back = splitter_cell(tokens_trimmed, "\\")
-    # tokens_split_slash = splitter_cell(tokens_split_back, "/")
-    # tokens_split_apo = splitter_cell(tokens_split_slash, "'")
-
-    # # trim punctuation again
-    # tokens_trim_again = trim_punct(tokens_split_apo, punctuation, keep_set)
-
-    # remove (< 3)-letter words apart from those appearing in keep_set
-    # tokens_rm_inf3 = [t for t in tokens_trim_again if len(t) > 2 or t in keep_set]
 
     # remove (< 3)-letter words apart from those appearing in keep_set
     tokens_rm_inf3 = [t for t in tokens if len(t) > 2 or t in keep_set]
@@ -260,101 +191,9 @@ def preprocess_data(df_raw) -> pd.DataFrame:
     """Return a preprocessed dataframe from a raw dataframe"""
     df = df_raw.copy()
 
-    PUNCTUATION = [
-        "'",
-        '"',
-        ",",
-        ".",
-        ";",
-        ":",
-        "?",
-        "!",
-        "+",
-        "..",
-        "''",
-        "``",
-        "||",
-        "\\\\",
-        "\\",
-        "==",
-        "+=",
-        "-=",
-        "-",
-        "_",
-        "=",
-        "(",
-        ")",
-        "[",
-        "]",
-        "{",
-        "}",
-        "<",
-        ">",
-        "/",
-        "|",
-        "&",
-        "*",
-        "%",
-        "$",
-        "#",
-        "@",
-        "`",
-        "^",
-        "~",
-    ]
+    PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
 
-    EXCLUDED_TERMS = [
-        "can't",
-        "d'oh",
-        "could't",
-        "could'nt",
-        "cound't",
-        "cound'nt",
-        "coulnd't",
-        "cdn'ed",
-        "doesn'it",
-        "does't",
-        "don'ts",
-        "n't",
-        "'nt",
-        "i'ca",
-        "i'ts",
-        "should't",
-        "want",
-        "would",
-        "would't",
-        "might't",
-        "must't",
-        "need't",
-        "n'th",
-        "wont't",
-        "non",
-        "no",
-        "use",
-        "using",
-        "usage",
-        "code",
-        "like",
-        "issue",
-        "error",
-        "file",
-        "files",
-        "run",
-        "runs",
-        "create",
-        "created",
-        'between',
-        't',
-        'any',
-        'using',
-        'this',
-        'out',
-        'm',
-        'file',
-        'each',
-        's',
-        "'ve",
-    ]
+    EXCLUDED_TERMS = ["can't", "d'oh", "could't", "could'nt", "cound't", "cound'nt", "coulnd't", "cdn'ed", "doesn'it", "does't", "don'ts", "n't", "'nt", "i'ca", "i'ts", "should't", "want", "would", "would't", "might't", "must't", "need't", "n'th", "wont't", "non", "no", "use", "using", "usage", "code", "like", "issue", "error", "file", "files", "run", "runs", "create", "created", 'between', 't', 'any', 'using', 'this', 'out', 'm', 'file', 'each', 's', "'ve"]
 
     # KEPT TOKENS SET
     # tags
@@ -408,6 +247,98 @@ def init_data():
     return df_pp
 
 
+# FORMERLY USED FUNCTIONS - one never knows **********************************
+
+# def clean_negation(tokens, exclude_set) -> list:
+#     """Return a list of tokens with negations cleaned"""
+#     i_offset = 0
+#     for i, t in enumerate(tokens):
+#         i -= i_offset
+#         if t == "n't" and i > 0:
+#             left = tokens[:i-1]
+#             joined = [tokens[i - 1] + t]
+#             right = tokens[i + 1:]
+#             if joined[0] in exclude_set:
+#                 tokens = left + right
+#                 i_offset += 2
+#             else:
+#                 tokens = left + joined + right
+#                 i_offset += 1
+
+#     return tokens
+
+
+# def trim_punct(tokens, punctuation, keep_set) -> list:
+#     """Return a list of tokens with punctuation trimmed,
+#     apart from words appearing in keep_set.
+#     """
+
+#     tokens_trimmed = []
+#     for t in tokens:
+#         if t[0] in punctuation and t not in keep_set and len(t) > 2:
+#             # because many specific terms begin with a "." followed by a letter
+#             if t[0] == "." and t[1] not in punctuation:
+#                 pass
+#             if t[0] == "_" and t[1] == "_":
+#                 pass
+#             else:
+#                 t = t[1:]
+#         if t[-1] in punctuation and t not in keep_set and len(t) > 2:
+#             t = t[:-1]
+#         # second check for words starting with an apostrophe
+#         if t[0] == "'" and t not in keep_set and len(t) > 2:
+#             t = t[1:]
+        
+#         tokens_trimmed.append(t)
+
+#     return tokens_trimmed
+
+
+# def splitter_cell(list_of_strings, char=str) -> list:
+#     """Split a string from a list into a list of substrings using a delimiter"""
+#     sub = []
+#     for s in list_of_strings:
+#         _ = list(filter(None, s.split(char)))
+#         if len(_) > 0: sub.extend(_)
+
+#     return sub
+
+# ****************************************************************************
+
 if __name__ == "__main__":
-    help()
-    
+    # help()
+    PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
+    TEST_STRING = "This is a test string. It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags, \n newlines \n, UPPERCASE WORDS, suspension dots... isolated numbers 4 654  or 9142 and punctuation ; /*+ and     multiple    spaces  and a+, C++, C#, .QL or even S programming langages."
+    KEEP_SET = {"c++", ".ql", "c#"}
+    EXCLUDE_SET = {"is", "a", "sometimes", "and", "langage", "a+"}
+    TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', 'langages']
+
+    t1 = "ITMS-91053: Missing API declaration - Privacy"
+    b1 = """<p>Why am I all of a suddent getting this on successful builds with Apple?</p>\n<pre><code>Although submission for App Store review was successful [blablabla] For more details about this policy, including a list of required reason APIs and approved reasons for usage, visit: https://blabla.com.\n</code></pre>\n"""
+    tags1 = "<ios><app-store><plist><appstore-approval><privacy-policy>"
+
+    t2 = "Why is builtin sorted() slower for a list containing descending numbers if each number appears twice consecutively?"
+    b2 = """<p>I sorted four similar lists. List <code>d</code> consistently takes much longer than the others, which all take about the same time:</p>\n<pre class="lang-none prettyprint-override"><code>a:  33.5 ms\nb:  33.4 ms\nc:  36.4 ms\nd: 110.9 ms\n</code></pre>\n<p>Why is that?</p>\n<p>Test script (<a href="https://blabla.com" rel="noreferrer">Attempt This Online!</a>):</p>\n<pre class="lang-py prettyprint-override"><code>from timeit import repeat\n\nn = 2_000_000\n [blablabla] print(f\'{name}: {time*1e3 :5.1f} ms\')\n</code></pre>\n"""
+    tags2 = "<python><algorithm><performance><sorting><time-complexity>"
+
+    import pandas as pd
+
+    data = [[t1, b1, tags1], [t2, b2, tags2]]
+    df = pd.DataFrame(data, columns=["Title", "Body", "Tags"])
+    print(df)
+
+    _ = preprocess_data(df)
+    print(_.shape)
+    # (2, 6)
+    print(_["title_bow"][0])
+    # itms-91053 missing api declaration privacy
+    print(_["title_bow"][1])
+    # builtin sorted slower list containing descending number number appears twice consecutively
+    print(_["body_bow"][0])
+    # suddent getting successful build apple
+    print(_["body_bow"][1])
+    # sorted four similar list list consistently take much longer others take time test script attempt online
+    print(_["doc_bow"][0])
+    # itms-91053 missing api declaration privacy suddent getting successful build apple
+    print(_["doc_bow"][1])
+    # builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online
