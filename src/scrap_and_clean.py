@@ -327,14 +327,5 @@ def init_data():
 # ****************************************************************************
 
 if __name__ == "__main__":
-    # help()
-
-    TEST_KEEP_SET = {"c++", ".ql", "c#"}
-    TEST_EXCLUDE_SET = {"is", "a", "sometimes", "and", "langage", "a+"}
-    TEST_TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', '-langages']
-
+    help()
     
-    _ = lemmatize_tokens(TEST_TOKENS, TEST_KEEP_SET, TEST_EXCLUDE_SET)
-    # """Test src.scrap_and_clean.clean_tokens function"""
-    # result = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tag', 'newlines', 'uppercase', 'word', 'dot', 'isolated', 'number', 'punctuation', 'multiple', 'c++', '.ql', 'even', 'programming', 'langages']
-    print(_)
