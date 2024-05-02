@@ -159,6 +159,25 @@ def lemmatize_tokens(tokens_list, keep_set, exclude_set) -> list:
     return lem_tok_list
 
 
+def clean_tokens(tokens_list, keep_set, exclude_set) -> list:
+    """Return cleansed tokens from a tokens list"""
+    # clean " ' " in front of certain words
+    clean_apo = []
+    clean_apo += [t[1:] if t[0] == "'" else t for t in tokens_list]
+
+    # clean " - " in front of certain words
+    clean_dash = []
+    clean_dash += [t[1:] if t[0] == "-" else t for t in clean_apo]
+
+    # remove (< 3)-letter words apart from those belonging to keep_set
+    tokens_rm_inf3 = [t for t in clean_dash if len(t) > 2 or t in keep_set]
+
+    # remove remaining excluded words
+    tokens_cleaned = [t for t in tokens_rm_inf3 if t not in exclude_set]
+
+    return tokens_cleaned
+
+
 def words_filter(words_list, method, keep_set, exclude_set) -> tuple:
     """Add or remove a list of words to the corpus:
     - if method is 'add', add them to necessary words and remove them from excluded words
@@ -182,7 +201,8 @@ def preprocess_doc(document, keep_set, exclude_set, punctuation) -> str:
     doc_clean = clean_string(document)
     doc_tokens = tokenize_str(doc_clean, keep_set, exclude_set, punctuation)
     doc_lemmed = lemmatize_tokens(doc_tokens, keep_set, exclude_set)
-    doc_preprocessed = " ".join(doc_lemmed)
+    doc_tk_clean = clean_tokens(doc_lemmed, keep_set, exclude_set)
+    doc_preprocessed = " ".join(doc_tk_clean)
 
     return doc_preprocessed
 
@@ -193,7 +213,8 @@ def preprocess_data(df_raw) -> pd.DataFrame:
 
     PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
 
-    EXCLUDED_TERMS = ["can't", "d'oh", "could't", "could'nt", "cound't", "cound'nt", "coulnd't", "cdn'ed", "doesn'it", "does't", "don'ts", "n't", "'nt", "i'ca", "i'ts", "should't", "want", "would", "would't", "might't", "must't", "need't", "n'th", "wont't", "non", "no", "use", "using", "usage", "code", "like", "issue", "error", "file", "files", "run", "runs", "create", "created", 'between', 't', 'any', 'using', 'this', 'out', 'm', 'file', 'each', 's', "'ve"]
+    # updated from multiple trials → list differs from the EDA notebook list
+    EXCLUDED_TERMS = ["can't", "d'oh", "could't", "could'nt", "cound't", "cound'nt", "coulnd't", "cdn'ed", "doesn'it", "does't", "don'ts", "n't", "'nt", "i'ca", "i'ts", "should't", "want", "would", "would't", "might't", "must't", "need't", "n'th", "wont't", "non", "no", "use", "using", "usage", "code", "like", "issue", "error", "file", "files", "run", "runs", "create", "created", 'between', 't', 'any', 'using', 'this', 'out', 'm', 'file', 'each', 's', "'ve", "work", "way", "following", "problem", "tried", "also", "need", "trying", "example", "question", "value", "know", "application", "see", "new", "could", "however", "working", "change", "something", "used", "found", "result", "help", "quot", "running", "first", "seems", "without", "different", "two", "still", "look", "possible", "getting", "able", "even", "fine", "instead", "library", "answer", "another", "thanks", "read", "since", "inside", "idea", "every", "added"]
 
     # KEPT TOKENS SET
     # tags
@@ -307,38 +328,13 @@ def init_data():
 
 if __name__ == "__main__":
     # help()
-    PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
-    TEST_STRING = "This is a test string. It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags, \n newlines \n, UPPERCASE WORDS, suspension dots... isolated numbers 4 654  or 9142 and punctuation ; /*+ and     multiple    spaces  and a+, C++, C#, .QL or even S programming langages."
-    KEEP_SET = {"c++", ".ql", "c#"}
-    EXCLUDE_SET = {"is", "a", "sometimes", "and", "langage", "a+"}
-    TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', 'langages']
 
-    t1 = "ITMS-91053: Missing API declaration - Privacy"
-    b1 = """<p>Why am I all of a suddent getting this on successful builds with Apple?</p>\n<pre><code>Although submission for App Store review was successful [blablabla] For more details about this policy, including a list of required reason APIs and approved reasons for usage, visit: https://blabla.com.\n</code></pre>\n"""
-    tags1 = "<ios><app-store><plist><appstore-approval><privacy-policy>"
+    TEST_KEEP_SET = {"c++", ".ql", "c#"}
+    TEST_EXCLUDE_SET = {"is", "a", "sometimes", "and", "langage", "a+"}
+    TEST_TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', '-langages']
 
-    t2 = "Why is builtin sorted() slower for a list containing descending numbers if each number appears twice consecutively?"
-    b2 = """<p>I sorted four similar lists. List <code>d</code> consistently takes much longer than the others, which all take about the same time:</p>\n<pre class="lang-none prettyprint-override"><code>a:  33.5 ms\nb:  33.4 ms\nc:  36.4 ms\nd: 110.9 ms\n</code></pre>\n<p>Why is that?</p>\n<p>Test script (<a href="https://blabla.com" rel="noreferrer">Attempt This Online!</a>):</p>\n<pre class="lang-py prettyprint-override"><code>from timeit import repeat\n\nn = 2_000_000\n [blablabla] print(f\'{name}: {time*1e3 :5.1f} ms\')\n</code></pre>\n"""
-    tags2 = "<python><algorithm><performance><sorting><time-complexity>"
-
-    import pandas as pd
-
-    data = [[t1, b1, tags1], [t2, b2, tags2]]
-    df = pd.DataFrame(data, columns=["Title", "Body", "Tags"])
-    print(df)
-
-    _ = preprocess_data(df)
-    print(_.shape)
-    # (2, 6)
-    print(_["title_bow"][0])
-    # itms-91053 missing api declaration privacy
-    print(_["title_bow"][1])
-    # builtin sorted slower list containing descending number number appears twice consecutively
-    print(_["body_bow"][0])
-    # suddent getting successful build apple
-    print(_["body_bow"][1])
-    # sorted four similar list list consistently take much longer others take time test script attempt online
-    print(_["doc_bow"][0])
-    # itms-91053 missing api declaration privacy suddent getting successful build apple
-    print(_["doc_bow"][1])
-    # builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online
+    
+    _ = lemmatize_tokens(TEST_TOKENS, TEST_KEEP_SET, TEST_EXCLUDE_SET)
+    # """Test src.scrap_and_clean.clean_tokens function"""
+    # result = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tag', 'newlines', 'uppercase', 'word', 'dot', 'isolated', 'number', 'punctuation', 'multiple', 'c++', '.ql', 'even', 'programming', 'langages']
+    print(_)

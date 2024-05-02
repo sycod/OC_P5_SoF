@@ -7,6 +7,7 @@ from src.scrap_and_clean import clean_string
 from src.scrap_and_clean import clean_hashes
 from src.scrap_and_clean import tokenize_str
 from src.scrap_and_clean import lemmatize_tokens
+from src.scrap_and_clean import clean_tokens
 from src.scrap_and_clean import words_filter
 from src.scrap_and_clean import preprocess_doc
 from src.scrap_and_clean import preprocess_data
@@ -16,7 +17,7 @@ TEST_STRING = "This is a test string. It contains some <code>code</code> and <im
 TEST_KEEP_SET = {"c++", ".ql", "c#"}
 TEST_EXCLUDE_SET = {"is", "a", "sometimes", "and", "langage", "a+"}
 TEST_PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
-TEST_TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', 'langages']
+TEST_TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', '-langages']
 
 # raw dataframe simulation (only used features)
 t1 = "ITMS-91053: Missing API declaration - Privacy"
@@ -69,8 +70,17 @@ def test_tokenize_str(sentence, keep_set, exclude_set, punctuation):
 @pytest.mark.parametrize("exclude_set", [TEST_EXCLUDE_SET])
 def test_lemmatize_tokens(tokens, keep_set, exclude_set):
     """Test src.scrap_and_clean.lemmatize_tokens function"""
-    result = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tag', 'newlines', 'uppercase', 'word', 'dot', 'isolated', 'number', 'punctuation', 'multiple', 'c++', '.ql', 'even', 'programming', 'langages']
+    result = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tag', 'newlines', 'uppercase', 'word', 'dot', 'isolated', 'number', 'punctuation', 'multiple', 'c++', '.ql', 'even', 'programming', '-langages']
     assert lemmatize_tokens(tokens, keep_set, exclude_set) == result
+
+
+@pytest.mark.parametrize("tokens", [TEST_TOKENS])
+@pytest.mark.parametrize("keep_set", [TEST_KEEP_SET])
+@pytest.mark.parametrize("exclude_set", [TEST_EXCLUDE_SET])
+def test_clean_tokens(tokens, keep_set, exclude_set):
+    """Test src.scrap_and_clean.clean_tokens function"""
+    result = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'c++', '.ql', 'even', 'programming', 'langages']
+    assert clean_tokens(tokens, keep_set, exclude_set) == result
 
 
 @pytest.mark.parametrize("words_list", ["c#", "removed"])
@@ -111,7 +121,7 @@ def test_preprocess_data(df_raw):
     assert _.shape == (2, 6)
     assert _["title_bow"][0] == "itms-91053 missing api declaration privacy"
     assert _["title_bow"][1] == "builtin sorted slower list containing descending number number appears twice consecutively"
-    # assert _["body_bow"][0] == "suddent getting successful build apple"
+    assert _["body_bow"][0] == "suddent successful build apple"
     assert _["body_bow"][1] == "sorted four similar list list consistently take much longer others take time test script attempt online"
-    assert _["doc_bow"][0] == "itms-91053 missing api declaration privacy suddent getting successful build apple"
+    assert _["doc_bow"][0] == "itms-91053 missing api declaration privacy suddent successful build apple"
     assert _["doc_bow"][1] == "builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online"
