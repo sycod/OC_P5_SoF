@@ -207,7 +207,7 @@ def preprocess_doc(document, keep_set, exclude_set, punctuation) -> str:
     return doc_preprocessed
 
 
-def preprocess_data(df_raw) -> pd.DataFrame:
+def preprocess_data(df_raw, tags_n_min=10) -> pd.DataFrame:
     """Return a preprocessed dataframe from a raw dataframe"""
     df = df_raw.copy()
 
@@ -248,7 +248,18 @@ def preprocess_data(df_raw) -> pd.DataFrame:
     # corpus
     df["doc_bow"] = df["title_bow"] + " " + df["body_bow"]
 
-    return df
+    # explode DF by tag
+    df_pp = df.explode('Tags')
+
+    # count tags and keep only those with at least 10 occurrences
+    vc = df_pp.Tags.value_counts()
+    tags_se_10 = vc[vc >= tags_n_min].index
+    print(tags_se_10)
+
+    # filter dataframe on tags with at least 10 occurrences
+    df_pp = df_pp[df_pp.Tags.isin(tags_se_10)]
+
+    return df_pp
 
 
 def init_data():

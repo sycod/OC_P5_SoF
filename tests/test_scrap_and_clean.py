@@ -113,15 +113,16 @@ def test_preprocess_doc(document, keep_set, exclude_set, punctuation):
     assert preprocess_doc(document, keep_set, exclude_set, punctuation) == result
 
 
+@pytest.mark.parametrize("tags_n_min", [1])
 @pytest.mark.parametrize("df_raw", [TEST_DF_RAW])
-def test_preprocess_data(df_raw):
+def test_preprocess_data(df_raw, tags_n_min):
     """Test src.scrap_and_clean.preprocess_data function"""
-    _ = preprocess_data(df_raw)
+    _ = preprocess_data(df_raw, tags_n_min=tags_n_min)
 
-    assert _.shape == (2, 6)
-    assert _["title_bow"][0] == "itms-91053 missing api declaration privacy"
-    assert _["title_bow"][1] == "builtin sorted slower list containing descending number number appears twice consecutively"
-    assert _["body_bow"][0] == "suddent successful build apple"
-    assert _["body_bow"][1] == "sorted four similar list list consistently take much longer others take time test script attempt online"
-    assert _["doc_bow"][0] == "itms-91053 missing api declaration privacy suddent successful build apple"
-    assert _["doc_bow"][1] == "builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online"
+    assert _.shape == (10, 6)
+    assert _["title_bow"][0].unique()[0] == "itms-91053 missing api declaration privacy"
+    assert _["title_bow"][1].unique()[0] == "builtin sorted slower list containing descending number number appears twice consecutively"
+    assert _["body_bow"][0].unique()[0] == "suddent successful build apple"
+    assert _["body_bow"][1].unique()[0] == "sorted four similar list list consistently take much longer others take time test script attempt online"
+    assert _["doc_bow"][0].unique()[0] == "itms-91053 missing api declaration privacy suddent successful build apple"
+    assert _["doc_bow"][1].unique()[0] == "builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online"
