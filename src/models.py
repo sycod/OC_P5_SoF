@@ -7,8 +7,49 @@ from Levenshtein import ratio
 from sklearn.manifold import TSNE
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
 import matplotlib.pyplot as plt
 from matplotlib import colors
+
+
+def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True) -> dict:
+    """Evaluate LDA model perplexity for multiple number of topics (lower is better)"""
+    perplexities = []
+
+    for i in n_list:
+        lda = LatentDirichletAllocation(
+            n_components=i,
+            max_iter=5,
+            learning_method="online",
+            learning_offset=50.0,
+            random_state=random_state,
+        )
+        print(f"Evaluating n={i}...")
+        lda.fit(data)
+        p = lda.perplexity(data)
+        print(f"\t{p}")
+        
+        perplexities.append(p)
+
+    if plot:
+        x_ = n_list
+        y_ = perplexities
+
+        fig, ax = plt.subplots()
+        ax.set_ylim(min(y_) * 0.9, max(y_) * 1.1)
+
+        ax.bar(x_, y_, width=8)
+        ax.bar_label(ax.containers[0], label_type='edge')
+
+        ax.plot(x_, y_, marker='o', color='red')
+
+        # Adding labels and title
+        plt.xlabel('Number of topics')
+        plt.ylabel('Perplexity')
+        plt.title('Number of topics: perplexities plot')
+        plt.show()
+    
+    return dict(zip(n_list, perplexities))
 
 
 def score_terms(pred_words, target_words, cutoff=0.7) -> float:
@@ -16,8 +57,8 @@ def score_terms(pred_words, target_words, cutoff=0.7) -> float:
     score = 0
     for p_w in pred_words:
         score += max(ratio(t, p_w, score_cutoff=cutoff) for t in target_words)
-    score = np.round(score / len(pred_words), 3)
-    
+    score = np.round(score / len(target_words), 3)
+
     return score
     
 
@@ -108,7 +149,7 @@ def score_reduce(words_list, X, y, n_groups=5, model=None, model_type=None) -> t
         X_results = [topic_predict(topic_df, xi)[1] for xi in X]
     else:
         X_results = [get_5_tags_from_matrix(words_list, xi) for xi in X]
-    scores = [score_terms(p_w, y[i].split(" ")) for i, p_w in enumerate(X_results)]
+    scores = [score_terms(p_w, y[y.index[i]].split(" ")) for i, p_w in enumerate(X_results)]
     model_score = np.round(np.mean(scores), 3)
 
     # reduce dimensions

@@ -249,15 +249,27 @@ def preprocess_data(df_raw, tags_n_min=10) -> pd.DataFrame:
     df["doc_bow"] = df["title_bow"] + " " + df["body_bow"]
 
     # explode DF by tag
-    df_pp = df.explode('Tags')
+    df_exploded = df.explode('Tags')
 
     # count tags and keep only those with at least 10 occurrences
-    vc = df_pp.Tags.value_counts()
+    vc = df_exploded.Tags.value_counts()
     tags_se_10 = vc[vc >= tags_n_min].index
-    print(tags_se_10)
 
     # filter dataframe on tags with at least 10 occurrences
-    df_pp = df_pp[df_pp.Tags.isin(tags_se_10)]
+    df_exploded = df_exploded[df_exploded.Tags.isin(tags_se_10)]
+
+    # regroup by corpus
+    df_pp = df_exploded.groupby("doc_bow", as_index=False, sort=False).agg(
+        tags=("Tags", " ".join),
+        score=("Score", "first"),
+        answers=("AnswerCount", "first"),
+        views=("ViewCount", "first"),
+        date=("CreationDate", "first"),
+        title_bow=("title_bow", "first"),
+        title=("Title", "first"),
+        body_bow=("body_bow", "first"),
+        body=("Body", "first"),
+    )
 
     return df_pp
 
