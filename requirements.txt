@@ -5,6 +5,8 @@ dill            # Pickle alternative for data science
 python-dotenv   # Environment variables
 emoji           # Emoji support
 fastapi         # API
+# gensim          # topic modelling
+pyLDAvis        # topic model visualization
 pylint          # great linter
 pytest          # unit tests
 pytest-cov      # unit tests, cover a specific function
