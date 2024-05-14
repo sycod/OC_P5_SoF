@@ -90,66 +90,26 @@ def get_5_tags_from_matrix(words_list, X, n_max=5) -> list:
     return preds
 
 
-def topic_weights_df(topic_model, cv_names, n_top_words=10) -> pd.DataFrame:
-    """Return a dataframe of n top words with weights, for each LDA topic"""
-    # get best 10 words for each topic, with weights
-    dfs_list = []
-    for i, t in enumerate(topic_model.components_):
-        weights = sorted(topic_model.components_[i], reverse=True)[:n_top_words]
-        indices = topic_model.components_[i].argsort()[:-n_top_words - 1:-1]
-        words = [cv_names[w] for w in indices]
-
-        # all in a dataframe
-        _ = pd.DataFrame({
-            "topic": [i] * n_top_words,
-            "index": indices,
-            "word": words,
-            "weight": weights,
-        })
-        # store
-        dfs_list.append(_)
-
-    ldaword_weights = pd.concat(dfs_list, ignore_index=True)
+def get_5_tags_from_array(words_list, X, n_max=5) -> list:
+    """Predict a maximum of n_max words from an array."""
+    preds = words_list[np.argsort(X)[-min(len(X), n_max):][::-1]].tolist()
     
-    return ldaword_weights
+    return preds
 
 
-def topic_predict(df, X, n_top_topics=10) -> tuple:
-    """Return transformed model predictions and weights from a fitted model and transformed features"""
-
-    # get the n top topics
-    top_topics = X.argsort()[: -n_top_topics - 1 : -1]
-
-    # select only concerned topics
-    df_ = df.loc[df["topic"].isin(top_topics)]
-
-    # compute new weights according to LDA
-    for t in top_topics:
-        df_.loc[df_["topic"] == t, "weight"] *= X[t]
-    # and get best weights first
-    results = df_.sort_values(by="weight", ascending=False)
-
-    # create words list
-    pred_words = []
-    i = 0
-    while len(pred_words) < 5:
-        if results.iloc[i].word not in pred_words:
-            pred_words.append(results.iloc[i].word)
-        i += 1
-    
-    return results, pred_words
-
-
-def score_reduce(words_list, X, y, n_groups=5, model=None, model_type=None) -> tuple:
+def score_reduce(words_list, X, y, model=None, model_type=None) -> tuple:
     """Returns model results from words list, features and targets"""
     start_time = time.time()
 
     # get scores from results
     if model_type == "topic":
-        topic_df = topic_weights_df(model, words_list)
-        X_results = [topic_predict(topic_df, xi)[1] for xi in X]
+        # weights matricial product: topics * words
+        preds_weights = X.dot(model.components_)
+        # get results
+        X_results = [get_5_tags_from_array(words_list, xi) for xi in preds_weights]
     else:
         X_results = [get_5_tags_from_matrix(words_list, xi) for xi in X]
+
     scores = [score_terms(p_w, y[y.index[i]].split(" ")) for i, p_w in enumerate(X_results)]
     model_score = np.round(np.mean(scores), 3)
 
@@ -178,11 +138,35 @@ def get_topics(model, feature_names, n_top_words) -> list:
 
 
 def plot_model(model_score, scores, X_tsne) :
-    """Scores & TSNE plotting """
+    """Scores & TSNE plotting"""
     fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
 
     # T-SNE DATA
     scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=scores, cmap='viridis')    
+    axs[0].set_title(f"T-SNE representation")
+
+    # SCORES
+    N, bins, patches = axs[1].hist(scores, bins=10)
+    # color by score (bin)
+    fracs = bins / bins.max()
+    norm = colors.Normalize(0, 1)
+    # loop through objects and set color of each
+    for thisfrac, thispatch in zip(fracs, patches):
+        color = plt.cm.viridis(norm(thisfrac))
+        thispatch.set_facecolor(color)
+    axs[1].set_title(f"Score: {model_score}")
+    axs[1].set_xlabel('Score')
+    axs[1].set_ylabel('Count')
+
+    plt.show()
+
+
+def plot_topic_model(model_score, scores, X_tsne, top_topics) :
+    """Scores & TSNE plotting with color by topic"""
+    fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
+
+    # T-SNE DATA
+    scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=top_topics, cmap='viridis')    
     axs[0].set_title(f"T-SNE representation")
 
     # SCORES
