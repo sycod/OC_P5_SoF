@@ -4,7 +4,7 @@
     "customizations": {
       "codespaces": {
         "openFiles": [
-          "3_non_supervise.ipynb",
+          "4_supervise.ipynb",
         ]
       },
       "vscode": {
