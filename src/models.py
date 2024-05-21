@@ -114,7 +114,8 @@ def score_reduce(words_list, X, y, model=None, model_type=None) -> tuple:
     model_score = np.round(np.mean(scores), 3)
 
     # reduce dimensions
-    tsne = TSNE(n_components=2, perplexity=50, n_iter=2000, init='random', learning_rate=200, random_state=42)
+    # TSNE random init used instead of PCA because sparse matrix can't use PCA
+    tsne = TSNE(n_components=2, perplexity=50, n_iter=2000, init='random', random_state=42)
     X_tsne = tsne.fit_transform(X)
 
     duration = np.round(time.time() - start_time,0)

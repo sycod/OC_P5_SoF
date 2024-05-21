@@ -291,64 +291,6 @@ def init_data():
     return df_pp
 
 
-# FORMERLY USED FUNCTIONS - one never knows **********************************
-
-# def clean_negation(tokens, exclude_set) -> list:
-#     """Return a list of tokens with negations cleaned"""
-#     i_offset = 0
-#     for i, t in enumerate(tokens):
-#         i -= i_offset
-#         if t == "n't" and i > 0:
-#             left = tokens[:i-1]
-#             joined = [tokens[i - 1] + t]
-#             right = tokens[i + 1:]
-#             if joined[0] in exclude_set:
-#                 tokens = left + right
-#                 i_offset += 2
-#             else:
-#                 tokens = left + joined + right
-#                 i_offset += 1
-
-#     return tokens
-
-
-# def trim_punct(tokens, punctuation, keep_set) -> list:
-#     """Return a list of tokens with punctuation trimmed,
-#     apart from words appearing in keep_set.
-#     """
-
-#     tokens_trimmed = []
-#     for t in tokens:
-#         if t[0] in punctuation and t not in keep_set and len(t) > 2:
-#             # because many specific terms begin with a "." followed by a letter
-#             if t[0] == "." and t[1] not in punctuation:
-#                 pass
-#             if t[0] == "_" and t[1] == "_":
-#                 pass
-#             else:
-#                 t = t[1:]
-#         if t[-1] in punctuation and t not in keep_set and len(t) > 2:
-#             t = t[:-1]
-#         # second check for words starting with an apostrophe
-#         if t[0] == "'" and t not in keep_set and len(t) > 2:
-#             t = t[1:]
-        
-#         tokens_trimmed.append(t)
-
-#     return tokens_trimmed
-
-
-# def splitter_cell(list_of_strings, char=str) -> list:
-#     """Split a string from a list into a list of substrings using a delimiter"""
-#     sub = []
-#     for s in list_of_strings:
-#         _ = list(filter(None, s.split(char)))
-#         if len(_) > 0: sub.extend(_)
-
-#     return sub
-
-# ****************************************************************************
-
 if __name__ == "__main__":
     help()
     

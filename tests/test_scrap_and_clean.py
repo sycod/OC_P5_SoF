@@ -23,13 +23,21 @@ TEST_TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags',
 t1 = "ITMS-91053: Missing API declaration - Privacy"
 b1 = """<p>Why am I all of a suddent getting this on successful builds with Apple?</p>\n<pre><code>Although submission for App Store review was successful [blablabla] For more details about this policy, including a list of required reason APIs and approved reasons for usage, visit: https://blabla.com.\n</code></pre>\n"""
 tags1 = "<ios><app-store><plist><appstore-approval><privacy-policy>"
+score1 = 12
+answercount1 = 1
+view1 = 111
+date1 = "2024-01-01 13:37:01"
 
 t2 = "Why is builtin sorted() slower for a list containing descending numbers if each number appears twice consecutively?"
 b2 = """<p>I sorted four similar lists. List <code>d</code> consistently takes much longer than the others, which all take about the same time:</p>\n<pre class="lang-none prettyprint-override"><code>a:  33.5 ms\nb:  33.4 ms\nc:  36.4 ms\nd: 110.9 ms\n</code></pre>\n<p>Why is that?</p>\n<p>Test script (<a href="https://blabla.com" rel="noreferrer">Attempt This Online!</a>):</p>\n<pre class="lang-py prettyprint-override"><code>from timeit import repeat\n\nn = 2_000_000\n [blablabla] print(f\'{name}: {time*1e3 :5.1f} ms\')\n</code></pre>\n"""
 tags2 = "<python><algorithm><performance><sorting><time-complexity>"
+score2 = 21
+answercount2 = 2
+view2 = 222
+date2 = "2023-02-02 13:37:02"
 
-data = [[t1, b1, tags1], [t2, b2, tags2]]
-TEST_DF_RAW = pd.DataFrame(data, columns=["Title", "Body", "Tags"])
+data = [[t1, b1, tags1, score1, answercount1, view1, date1], [t2, b2, tags2, score2, answercount2, view2, date2]]
+TEST_DF_RAW = pd.DataFrame(data, columns=["Title", "Body", "Tags", "Score", "AnswerCount", "ViewCount", "CreationDate"])
 
 
 def test_get_languages():
@@ -119,10 +127,12 @@ def test_preprocess_data(df_raw, tags_n_min):
     """Test src.scrap_and_clean.preprocess_data function"""
     _ = preprocess_data(df_raw, tags_n_min=tags_n_min)
 
-    assert _.shape == (10, 6)
-    assert _["title_bow"][0].unique()[0] == "itms-91053 missing api declaration privacy"
-    assert _["title_bow"][1].unique()[0] == "builtin sorted slower list containing descending number number appears twice consecutively"
-    assert _["body_bow"][0].unique()[0] == "suddent successful build apple"
-    assert _["body_bow"][1].unique()[0] == "sorted four similar list list consistently take much longer others take time test script attempt online"
-    assert _["doc_bow"][0].unique()[0] == "itms-91053 missing api declaration privacy suddent successful build apple"
-    assert _["doc_bow"][1].unique()[0] == "builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online"
+    assert _.shape == (2, 10)
+    
+    assert _["title_bow"][0] == "itms-91053 missing api declaration privacy"
+    assert _["title_bow"][1] == "builtin sorted slower list containing descending number number appears twice consecutively"
+
+    assert _["body_bow"][0] == "suddent successful build apple"
+    assert _["body_bow"][1] == "sorted four similar list list consistently take much longer others take time test script attempt online"
+    assert _["doc_bow"][0] == "itms-91053 missing api declaration privacy suddent successful build apple"
+    assert _["doc_bow"][1] == "builtin sorted slower list containing descending number number appears twice consecutively sorted four similar list list consistently take much longer others take time test script attempt online"
