@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 
 
-def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True) -> dict:
+def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True, width=8) -> dict:
     """Evaluate LDA model perplexity for multiple number of topics (lower is better)"""
     perplexities = []
 
@@ -39,7 +39,7 @@ def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot
         fig, ax = plt.subplots()
         ax.set_ylim(min(y_) * 0.9, max(y_) * 1.1)
 
-        ax.bar(x_, y_, width=8)
+        ax.bar(x_, y_, width=width)
         ax.bar_label(ax.containers[0], label_type='edge')
 
         ax.plot(x_, y_, marker='o', color='red')
@@ -143,8 +143,8 @@ def plot_model(model_score, scores, X_tsne) :
     fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
 
     # T-SNE DATA
-    scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=scores, cmap='viridis')    
-    axs[0].set_title(f"T-SNE representation")
+    scatter = axs[0].scatter(X_tsne[:,0], X_tsne[:,1], c=scores, cmap='viridis')    
+    axs[0].set_title("T-SNE representation")
 
     # SCORES
     N, bins, patches = axs[1].hist(scores, bins=10)
@@ -167,7 +167,7 @@ def plot_topic_model(model_score, scores, X_tsne, top_topics) :
     fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
 
     # T-SNE DATA
-    scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=top_topics, cmap='viridis')    
+    scatter = axs[0].scatter(X_tsne[:,0], X_tsne[:,1], c=top_topics, cmap='viridis')    
     axs[0].set_title(f"T-SNE representation")
 
     # SCORES
@@ -186,6 +186,70 @@ def plot_topic_model(model_score, scores, X_tsne, top_topics) :
     plt.show()
 
 
+def score_plot_model(preds, X, y, plot=True, top_topics=None) -> tuple:
+    """Returns model scores from predictions and targets, including plot"""
+    start_time = time.time()
+
+    preds_list = [x.split(" ") for x in preds]
+    
+    scores = [score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)]
+    model_score = np.round(np.mean(scores), 3)
+
+    # reduce dimensions
+    tsne = TSNE(n_components=2, perplexity=50, n_iter=2000, init='pca')
+    X_tsne = tsne.fit_transform(X)
+
+    duration = np.round(time.time() - start_time,0)
+
+    print("Score: ", model_score, "- Duration: ", duration)
+    
+    if plot:
+        fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
+        color = scores if top_topics is None else top_topics
+
+        # T-SNE DATA
+        scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=color, cmap='viridis')    
+        axs[0].set_title(f"T-SNE representation")
+
+        # SCORES
+        N, bins, patches = axs[1].hist(scores, bins=10)
+        # color by score (bin)
+        fracs = bins / bins.max()
+        norm = colors.Normalize(0, 1)
+        # loop through objects and set color of each
+        for thisfrac, thispatch in zip(fracs, patches):
+            color = plt.cm.viridis(norm(thisfrac))
+            thispatch.set_facecolor(color)
+        axs[1].set_title(f"Score: {model_score}")
+        axs[1].set_xlabel('Score')
+        axs[1].set_ylabel('Count')
+
+        plt.show()
+
+    return model_score, scores
+    
+
+def lr_predict_tags(model, X, n_tags=5) -> list:
+    """Use logistic regression probabilities to get at least n predicted tags"""
+    ppbs = model.predict_proba(X)
+    classes = model.classes_
+    pred_tags = []
+
+    for i, x in enumerate(X):
+        # create list of tags from n first classes
+        pred_list = (" ").join([classes[c] for c in ppbs[i].argsort()[: -n_tags - 1 : -1]]).split(" ")
+        # keep only 5 first tags
+        pred = set()
+        j = 0
+        while len(pred) < 5:
+            pred.add(pred_list[j])
+            j += 1
+        # add tags to predictions list
+        pred_tags.append((" ").join(pred))
+
+    return pred_tags
+
+
 # def vect_data(data, vec_type="cv") -> np.ndarray:
 #     """Vectorizes data with CountVectorizer or TfidfVectorizer"""
 #     if vec_type == "cv":
@@ -199,4 +263,4 @@ def plot_topic_model(model_score, scores, X_tsne, top_topics) :
 
 
 if __name__ == "__main__":
-    print(f"\n👉 results_from_vec_matrix(values) -> str\n{results_from_vec_matrix.__doc__}")
+    help()
