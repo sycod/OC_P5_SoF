@@ -4,13 +4,14 @@ import logging
 import time
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib import colors
 from Levenshtein import ratio
 from sklearn.manifold import TSNE
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-import matplotlib.pyplot as plt
-from matplotlib import colors
+from sklearn.metrics import jaccard_score
 
 
 def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True, width=8) -> dict:
@@ -187,32 +188,37 @@ def plot_topic_model(model_score, scores, X_tsne, top_topics) :
 
 
 def score_plot_model(preds, X, y, plot=True, top_topics=None) -> tuple:
-    """Returns model scores from predictions and targets, including plot"""
+    """Returns model tags cover and Jaccard scores from predictions and targets, including plot"""
     start_time = time.time()
 
+    # tags cover scores
     preds_list = [x.split(" ") for x in preds]
-    
-    scores = [score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)]
-    model_score = np.round(np.mean(scores), 3)
+    tc_scores = [score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)]
+    tc_score = np.round(np.mean(tc_scores), 3)
+
+    # jaccard scores
+    j_scores = [score_jaccard(p_w, y.to_list()[i]) for i, p_w in enumerate(preds)]
+    j_score = np.round(np.mean(j_scores), 3)
 
     # reduce dimensions
     tsne = TSNE(n_components=2, perplexity=50, n_iter=2000, init='pca')
     X_tsne = tsne.fit_transform(X)
 
-    duration = np.round(time.time() - start_time,0)
+    duration = np.round(time.time() - start_time, 0)
 
-    print("Score: ", model_score, "- Duration: ", duration)
+    print("Tag cover score: ", tc_score, "- Jaccard score: ", j_score, "- Duration: ", duration)
     
     if plot:
-        fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
-        color = scores if top_topics is None else top_topics
+        fig, axs = plt.subplots(1, 3, figsize=(12,4), tight_layout=True)
+        color = j_scores if top_topics is None else top_topics
 
-        # T-SNE DATA
+        # T-SNE
         scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=color, cmap='viridis')    
         axs[0].set_title(f"T-SNE representation")
 
-        # SCORES
-        N, bins, patches = axs[1].hist(scores, bins=10)
+        # TAGS COVER SCORES
+        N, bins, patches = axs[1].hist(tc_scores, bins=10)
+        N, bins, patches = axs[1].hist(tc_scores, bins=10)
         # color by score (bin)
         fracs = bins / bins.max()
         norm = colors.Normalize(0, 1)
@@ -220,14 +226,28 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None) -> tuple:
         for thisfrac, thispatch in zip(fracs, patches):
             color = plt.cm.viridis(norm(thisfrac))
             thispatch.set_facecolor(color)
-        axs[1].set_title(f"Score: {model_score}")
-        axs[1].set_xlabel('Score')
+        axs[1].set_title(f"Tag cover score: {tc_score}")
+        axs[1].set_xlabel('Tag cover score')
         axs[1].set_ylabel('Count')
+
+        # JACCARD SCORES
+        N, bins, patches = axs[2].hist(j_scores, bins=10)
+        N, bins, patches = axs[2].hist(j_scores, bins=10)
+        # color by score (bin)
+        fracs = bins / bins.max()
+        norm = colors.Normalize(0, 1)
+        # loop through objects and set color of each
+        for thisfrac, thispatch in zip(fracs, patches):
+            color = plt.cm.viridis(norm(thisfrac))
+            thispatch.set_facecolor(color)
+        axs[2].set_title(f"Jaccard score: {j_score}")
+        axs[2].set_xlabel('Jaccard score')
+        axs[2].set_ylabel('Count')
 
         plt.show()
 
-    return model_score, scores
-    
+    return tc_score, j_score, tc_scores, j_scores
+        
 
 def lr_predict_tags(model, X, n_tags=5) -> list:
     """Use logistic regression probabilities to get at least n predicted tags"""
@@ -248,6 +268,28 @@ def lr_predict_tags(model, X, n_tags=5) -> list:
         pred_tags.append((" ").join(pred))
 
     return pred_tags
+
+
+def score_jaccard(y_true, y_pred) -> float:
+    """Return the Jaccard score between 2 strings"""
+
+    y_true = y_true.split(" ")
+    y_pred = y_pred.split(" ")
+    pred_labels = []
+
+    # since order is important, we need to keep the order of the true labels
+    # correct labels are added in the order they appear in the true labels
+    i = 0
+    while len(pred_labels) < len(y_true):
+        if y_true[i] in y_pred:
+            pred_labels.append(y_true[i])
+        else:
+            pred_labels.append("0")
+        i += 1
+
+    j_score = jaccard_score(y_true, pred_labels, average='weighted')
+
+    return j_score
 
 
 # def vect_data(data, vec_type="cv") -> np.ndarray:
