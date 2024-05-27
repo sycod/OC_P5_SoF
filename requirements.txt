@@ -1,20 +1,21 @@
-black           # PEP8 formatter
-black[jupyter]  # PEP8 formatter for Jupyter NB
-click           # CLI great interface
-dill            # Pickle alternative for data science
-python-dotenv   # Environment variables
-emoji           # Emoji support
-fastapi         # API
-# gensim          # topic modelling
-pyLDAvis        # topic model visualization
-pylint          # great linter
-pytest          # unit tests
-pytest-cov      # unit tests, cover a specific function
-pyyaml          # YAML support
-uvicorn         # ASGI web server
-mlflow          # MLOps must-have for tracking experiments
-scikit-learn    # ML must-have library
-stackapi        # StackOverflow API
-notebook        # Jupyter notebook
-nltk            # Natural Language Toolkit
-wordcloud       # Word cloud generator
+black               # PEP8 formatter
+black[jupyter]      # PEP8 formatter for Jupyter NB
+click               # CLI great interface
+dill                # Pickle alternative for data science
+python-dotenv       # Environment variables
+emoji               # Emoji support
+fastapi             # API
+gensim              # topic modelling
+pyLDAvis            # topic model visualization
+pylint              # great linter
+pytest              # unit tests
+pytest-cov          # unit tests, cover a specific function
+python-Levenshtein  # string similarity
+pyyaml              # YAML support
+uvicorn             # ASGI web server
+mlflow              # MLOps must-have for tracking experiments
+scikit-learn        # ML must-have library
+stackapi            # StackOverflow API
+notebook            # Jupyter notebook
+nltk                # Natural Language Toolkit
+wordcloud           # Word cloud generator

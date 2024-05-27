@@ -3,15 +3,13 @@
 import logging
 import time
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from Levenshtein import ratio
 from sklearn.manifold import TSNE
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.metrics import jaccard_score
+from sklearn.model_selection import train_test_split
 
 
 def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True, width=8) -> dict:
@@ -26,10 +24,10 @@ def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot
             learning_offset=50.0,
             random_state=random_state,
         )
-        print(f"Evaluating n={i}...")
+        logging.info(f"Evaluating n={i}...")
         lda.fit(data)
         p = lda.perplexity(data)
-        print(f"\t{p}")
+        logging.info(f"\t{p}")
         
         perplexities.append(p)
 
@@ -121,7 +119,7 @@ def score_reduce(words_list, X, y, model=None, model_type=None) -> tuple:
 
     duration = np.round(time.time() - start_time,0)
 
-    print("Score: ", model_score, "- Duration: ", duration)
+    logging.info(f"Score: {model_score} - Duration: {duration}")
     
     return model_score, X_results, scores, X_tsne
 
@@ -187,7 +185,7 @@ def plot_topic_model(model_score, scores, X_tsne, top_topics) :
     plt.show()
 
 
-def score_plot_model(preds, X, y, plot=True, top_topics=None) -> tuple:
+def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> tuple:
     """Returns model tags cover and Jaccard scores from predictions and targets, including plot"""
     start_time = time.time()
 
@@ -204,9 +202,11 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None) -> tuple:
     tsne = TSNE(n_components=2, perplexity=50, n_iter=2000, init='pca')
     X_tsne = tsne.fit_transform(X)
 
-    duration = np.round(time.time() - start_time, 0)
-
-    print("Tag cover score: ", tc_score, "- Jaccard score: ", j_score, "- Duration: ", duration)
+    if time_it:
+        duration = np.round(time.time() - start_time, 0)
+        print(f"Tag cover score: {tc_score} - Jaccard score: {j_score} - Duration: {duration}")
+    else:
+        print(f"Tag cover score: {tc_score} - Jaccard score: {j_score}")
     
     if plot:
         fig, axs = plt.subplots(1, 3, figsize=(12,4), tight_layout=True)
@@ -290,6 +290,25 @@ def score_jaccard(y_true, y_pred) -> float:
     j_score = jaccard_score(y_true, pred_labels, average='weighted')
 
     return j_score
+
+
+def select_split_data(df, random_state=42, test_size=1000, start_date=None, end_date=None) -> tuple:
+    """Prepare splitted and eventually date-windowed data from a preprocessed dataframe"""
+    # ceil / floor data from date
+    if start_date:
+        df = df.loc[(df['date'] >= start_date)]
+    if end_date:
+        df = df.loc[(df['date'] < end_date)]
+
+    # select columns
+    df = df[["doc_bow", "tags"]]
+
+    # X, y, train, test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        df["doc_bow"], df["tags"], test_size=test_size, random_state=random_state
+    )
+
+    return X_train, X_test, y_train, y_test
 
 
 # def vect_data(data, vec_type="cv") -> np.ndarray:

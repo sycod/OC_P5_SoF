@@ -47,15 +47,22 @@ def init_raw_df() -> pd.DataFrame:
     """Get initial data and return raw dataframe"""
     load_dotenv()
     DATA_URL = os.getenv("DATA_URL")
-    if not os.path.exists("data/data_raw.pkl"):
+
+    data_dir = "data"
+    data_file = os.path.join(data_dir, "data_raw.pkl")
+
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
+    if not os.path.exists(data_file):
         logging.info(f"Loading data from {DATA_URL}...")
         df_raw = pd.read_csv(DATA_URL)
-        with open("data/data_raw.pkl", "wb") as f:
+        with open(data_file, "wb") as f:
             pickle.dump(df_raw, f)
             logging.info(f"✅ Raw data saved")
     else:
         logging.info(f"Loading data from local file...")
-        with open("data/data_raw.pkl", "rb") as f:
+        with open(data_file, "rb") as f:
             df_raw = pickle.load(f)
             logging.info(f"✅ Raw data loaded")
 

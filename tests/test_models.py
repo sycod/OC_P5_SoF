@@ -44,3 +44,7 @@ def test_get_5_tags_from_matrix(words_list, X):
     """Test src.models.get_5_tags_from_matrix function"""
     tags = get_5_tags_from_matrix(words_list, X)
     assert tags == ['api', 'python', 'selenium', 'string', 'regex']
+
+
+# score_jaccard
+# select_split_data
