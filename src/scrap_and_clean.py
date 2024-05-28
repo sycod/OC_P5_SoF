@@ -132,7 +132,8 @@ def clean_hashes(tokens, keep_set) -> list:
 
 def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
     """Return a list of cleansed tokens from a string,  excluding some words"""
-    # tokenize except excluded words
+    # tokenize except excluded 
+    nltk.download('punkt')  # downloaded just once, either checks update
     tokens = nltk.word_tokenize(sentence)
 
     # remove hashes from watch list
@@ -152,6 +153,7 @@ def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
 
 def lemmatize_tokens(tokens_list, keep_set, exclude_set) -> list:
     """Return lemmatized tokens from a tokens list, on conditions"""
+    nltk.download('wordnet')    # downloaded just once, either checks update
     kilmister = nltk.wordnet.WordNetLemmatizer()
     lem_tok_list = []
 
