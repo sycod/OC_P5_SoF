@@ -18,4 +18,5 @@ scikit-learn        # ML must-have library
 stackapi            # StackOverflow API
 notebook            # Jupyter notebook
 nltk                # Natural Language Toolkit
+tensorflow_hub      # ML models
 wordcloud           # Word cloud generator
