@@ -19,5 +19,6 @@ stackapi            # StackOverflow API
 notebook            # Jupyter notebook
 nltk                # Natural Language Toolkit
 tensorflow_hub      # ML models from TensorFlow hub
+torch               # DL
 transformers        # ML models from Hugging Face
 wordcloud           # Word cloud generator

@@ -311,17 +311,5 @@ def select_split_data(df, random_state=42, test_size=1000, start_date=None, end_
     return X_train, X_test, y_train, y_test
 
 
-# def vect_data(data, vec_type="cv") -> np.ndarray:
-#     """Vectorizes data with CountVectorizer or TfidfVectorizer"""
-#     if vec_type == "cv":
-#         vectorizer = CountVectorizer(token_pattern=r"\S+", dtype=np.uint16, min_df=10)
-#     elif vec_type == "tfidf":
-#         vectorizer = TfidfVectorizer(token_pattern=r"\S+", min_df=10)
-#     else:
-#         raise ValueError("Unknown vectorizer type (vec_type)")
-
-#     return vectorizer.fit_transform(data)
-
-
 if __name__ == "__main__":
     help()
