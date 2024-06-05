@@ -8,6 +8,8 @@ from matplotlib import colors
 from Levenshtein import ratio
 from sklearn.manifold import TSNE
 from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.linear_model import LogisticRegression
+import torch
 from sklearn.metrics import jaccard_score
 from sklearn.model_selection import train_test_split
 
@@ -198,10 +200,6 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> t
     j_scores = [score_jaccard(p_w, y.to_list()[i]) for i, p_w in enumerate(preds)]
     j_score = np.round(np.mean(j_scores), 3)
 
-    # reduce dimensions
-    tsne = TSNE(n_components=2, perplexity=50, max_iter=2000, init='pca')
-    X_tsne = tsne.fit_transform(X)
-
     if time_it:
         duration = np.round(time.time() - start_time, 0)
         print(f"Tag cover score: {tc_score} - Jaccard score: {j_score} - Duration: {duration}")
@@ -209,6 +207,10 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> t
         print(f"Tag cover score: {tc_score} - Jaccard score: {j_score}")
     
     if plot:
+        # reduce dimensions
+        tsne = TSNE(n_components=2, perplexity=50, max_iter=2000, init='pca')
+        X_tsne = tsne.fit_transform(X)
+
         fig, axs = plt.subplots(1, 3, figsize=(12,4), tight_layout=True)
         color = j_scores if top_topics is None else top_topics
 
@@ -309,6 +311,182 @@ def select_split_data(df, random_state=42, test_size=1000, start_date=None, end_
     )
 
     return X_train, X_test, y_train, y_test
+
+
+def evaluate_model(data, vocab=None, n_topics=5, random_state=42, plot=True) -> tuple:
+    """Train ML model from preprocessed and splitted data, packed in a tuple"""
+    start_time = time.time()
+
+    # unpack data
+    X_train_vect, X_test_vect, y_train, y_test = data
+
+    # topic modeling for plot output
+    if vocab is not None:
+        n_top_words = 10
+        lda = LatentDirichletAllocation(
+            n_components=n_topics,
+            max_iter=5,
+            learning_method="online",
+            learning_offset=50.0,
+            random_state=random_state,
+        )
+
+        # LDA needs positive values
+        X_train_pos = (
+            X_train_vect + abs(X_train_vect.min())
+            if X_train_vect.min() < 0
+            else X_train_vect
+        )
+        X_test_pos = (
+            X_test_vect + abs(X_test_vect.min())
+            if X_test_vect.min() < 0
+            else X_test_vect
+        )
+
+        # get topics
+        lda.fit(X_train_pos)
+        topics = get_topics(lda, vocab, n_top_words)
+        X_test_lda = lda.transform(X_test_pos)
+        top_topics_test = [xi.argsort()[:-2:-1][0] for xi in X_test_lda]
+    else:
+        top_topics_test = None
+
+    # classify
+    logging.info(f"Classifying...")
+    logreg = LogisticRegression(multi_class="ovr")
+    logreg.fit(X_train_vect, y_train)
+    predicted_probas = logreg.predict_proba(X_test_vect)
+    lr_preds = lr_predict_tags(logreg, X_test_vect)
+    logging.info(f"✅ {len(lr_preds)} predictions done")
+
+    # score
+    logging.info(f"Scoring...")
+    score_tc, score_j, scores_tc, scores_j = score_plot_model(
+        lr_preds, predicted_probas, y_test, top_topics=top_topics_test, time_it=False, plot=plot,
+    )
+
+    # duration
+    duration = np.round(time.time() - start_time, 0)
+    logging.info(f"Total duration: {duration}")
+
+    return score_tc, score_j, duration
+
+
+def w2v_vect_data(model, matrix) -> np.array:
+    """From a Word2Vec vectorizer, return a vectorized matrix"""
+    # loop over rows in tokenized X_train
+    doc_vectors = []
+    for tokens in matrix:
+        # loop over tokens in each row
+        doc_vec = []
+        for token in tokens:
+            if token in model.wv:
+                doc_vec.append(model.wv[token])
+        # mean it
+        doc_vectors.append(np.mean(doc_vec, axis=0))
+    # get X_train matrix
+    vector_matrix = np.array(doc_vectors)
+
+    return vector_matrix
+
+
+def bert_w_emb(
+    model, tokenizer, sentences, batch_size=10, max_length=32, max_pop=None
+) -> torch.Tensor:
+    """Process to BERT word embedding on a given sentences set"""
+    if max_pop is not None:
+        sentences = sentences[:max_pop]
+
+    for step in range(len(sentences) // batch_size):
+        # set start / stop steps
+        start_step = batch_size * step
+        if batch_size * (step + 1) >= len(sentences):
+            stop_step = len(sentences)
+        else:
+            stop_step = batch_size * (step + 1)
+
+        # tokenize sentences
+        inputs = tokenizer(
+            sentences[start_step:stop_step],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            add_special_tokens=True,
+            max_length=max_length,
+        )
+        # embed
+        outputs = model(**inputs)
+        word_embeddings = outputs.logits
+
+        # save in tensor
+        if step == 0:
+            X_bert_pt = word_embeddings
+        else:
+            X_bert_pt = torch.cat((X_bert_pt, word_embeddings), dim=0)
+
+        logging.info(
+            f"Step {step} ok on data[{start_step}:{stop_step}] -> shape {X_bert_pt.shape}"
+        )
+
+    return X_bert_pt
+
+
+def eval_stability(X_train, y_train, X_test_list, y_test_list) -> dict:
+    """Train W2V model from preprocessed train data and test samples list"""
+    start_time = time.time()
+    probas_list = []
+    predictions_list = []
+    metric_tag_cover = []
+    metric_jaccard = []
+
+    # train classifier
+    logging.info(f"⚙️ Training classifier...")
+    logreg = LogisticRegression(multi_class="ovr")
+    logreg.fit(X_train, y_train)
+    logging.info(f"✅ Training done")
+
+    # loop over test samples
+    for i, X_test in enumerate(X_test_list):
+        logging.info(f"Step {i+1}:")
+        
+        # predict
+        logging.info(f"\t⚙️ Predicting...")
+        predicted_probas = logreg.predict_proba(X_test)
+        lr_preds = lr_predict_tags(logreg, X_test)
+        # store
+        probas_list.append(predicted_probas)
+        predictions_list.append(lr_preds)
+        logging.info(f"\t✅ {len(lr_preds)} predictions")
+
+        # score
+        logging.info(f"\t⚙️ Scoring...")
+        y = y_test_list[i]
+        # tags cover
+        preds_list = [x.split(" ") for x in lr_preds]
+        tc_scores = [score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)]
+        score_tc = np.round(np.mean(tc_scores), 3)
+        # jaccard
+        j_scores = [score_jaccard(p_w, y.to_list()[i]) for i, p_w in enumerate(lr_preds)]
+        score_j = np.round(np.mean(j_scores), 3)
+        # store
+        metric_tag_cover.append(score_tc)
+        metric_jaccard.append(score_j)
+        logging.info(f"\t✅ Scores: tag cover {score_tc}, Jaccard {score_j}\n")
+
+    # duration
+    duration = np.round(time.time() - start_time, 0)
+    logging.info(f"⏱️ Total duration: {duration}s")
+
+    results = {
+        "model": logreg,
+        "lr_predictions": predictions_list,
+        "lr_probas": probas_list,
+        "tag_cover_scores": metric_tag_cover,
+        "jaccard_scores": metric_jaccard,
+        "duration": duration,
+    }
+
+    return results
 
 
 if __name__ == "__main__":

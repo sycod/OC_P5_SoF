@@ -6,6 +6,7 @@ python-dotenv       # Environment variables
 emoji               # Emoji support
 fastapi             # API
 gensim              # topic modelling
+plotly              # interactive plots (with JS)
 pyLDAvis            # topic model visualization
 pylint              # great linter
 pytest              # unit tests
