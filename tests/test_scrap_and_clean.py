@@ -16,7 +16,6 @@ from src.scrap_and_clean import preprocess_data
 TEST_STRING = "This is a test string. It contains some <code>code</code> and <img src='img'> and sometimes <other> <unusual> tags, \n newlines \n, UPPERCASE WORDS, suspension dots... isolated numbers 4 654  or 9142 and punctuation ; /*+ and     multiple    spaces  and a+, C++, C#, .QL or even S programming langages."
 TEST_KEEP_SET = {"c++", ".ql", "c#"}
 TEST_EXCLUDE_SET = {"is", "a", "sometimes", "and", "langage", "a+"}
-TEST_PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
 TEST_TOKENS = ['string', 'contains', 'some', 'code', 'other', 'unusual', 'tags', 'newlines', 'uppercase', 'words', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'and', 'c++', '.ql', 'even', 'programming', '-langages']
 
 # raw dataframe simulation (only used features)
@@ -66,11 +65,10 @@ def test_clean_hashes(tokens, watch_list):
 @pytest.mark.parametrize("sentence", [TEST_STRING])
 @pytest.mark.parametrize("keep_set", [TEST_KEEP_SET])
 @pytest.mark.parametrize("exclude_set", [TEST_EXCLUDE_SET])
-@pytest.mark.parametrize("punctuation", [TEST_PUNCTUATION])
-def test_tokenize_str(sentence, keep_set, exclude_set, punctuation):
+def test_tokenize_str(sentence, keep_set, exclude_set):
     """Test src.scrap_and_clean.tokenize_str function"""
     result = ['This', 'test', 'string', 'contains', 'some', 'code', 'code', '/code', 'img', "src='img", 'other', 'unusual', 'tags', 'newlines', 'UPPERCASE', 'WORDS', 'suspension', 'dots', 'isolated', 'numbers', 'punctuation', 'multiple', 'spaces', 'C++', '.QL', 'even', 'programming', 'langages']
-    assert tokenize_str(sentence, keep_set, exclude_set, punctuation) == result
+    assert tokenize_str(sentence, keep_set, exclude_set) == result
 
 
 @pytest.mark.parametrize("tokens", [TEST_TOKENS])
@@ -113,12 +111,11 @@ def test_words_filter(words_list, method, keep_set, exclude_set):
 @pytest.mark.parametrize("document", [TEST_STRING])
 @pytest.mark.parametrize("keep_set", [TEST_KEEP_SET])
 @pytest.mark.parametrize("exclude_set", [TEST_EXCLUDE_SET])
-@pytest.mark.parametrize("punctuation", [TEST_PUNCTUATION])
-def test_preprocess_doc(document, keep_set, exclude_set, punctuation):
+def test_preprocess_doc(document, keep_set, exclude_set):
     """Test src.scrap_and_clean.preprocess_doc function"""
     result = "this test string contains some tag newlines uppercase word suspension dot isolated number punctuation multiple space c++ c# .ql even programming langages"
     
-    assert preprocess_doc(document, keep_set, exclude_set, punctuation) == result
+    assert preprocess_doc(document, keep_set, exclude_set) == result
 
 
 @pytest.mark.parametrize("tags_n_min", [1])

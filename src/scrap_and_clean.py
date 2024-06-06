@@ -130,7 +130,7 @@ def clean_hashes(tokens, keep_set) -> list:
     return tokens
 
 
-def tokenize_str(sentence, keep_set, exclude_set, punctuation) -> list:
+def tokenize_str(sentence, keep_set, exclude_set) -> list:
     """Return a list of cleansed tokens from a string,  excluding some words"""
     # tokenize except excluded 
     nltk.download('punkt')  # downloaded just once, either checks update
@@ -205,10 +205,10 @@ def words_filter(words_list, method, keep_set, exclude_set) -> tuple:
     return keep_set, exclude_set
 
 
-def preprocess_doc(document, keep_set, exclude_set, punctuation) -> str:
+def preprocess_doc(document, keep_set, exclude_set) -> str:
     """Apply a sequence of words formatting actions on a document and returns a preprocessed string."""
     doc_clean = clean_string(document)
-    doc_tokens = tokenize_str(doc_clean, keep_set, exclude_set, punctuation)
+    doc_tokens = tokenize_str(doc_clean, keep_set, exclude_set)
     doc_lemmed = lemmatize_tokens(doc_tokens, keep_set, exclude_set)
     doc_tk_clean = clean_tokens(doc_lemmed, keep_set, exclude_set)
     doc_preprocessed = " ".join(doc_tk_clean)
@@ -246,9 +246,9 @@ def preprocess_data(df_raw, tags_n_min=10) -> pd.DataFrame:
 
     # PREPROCESSING
     # titles
-    df["title_bow"] = df["Title"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set, PUNCTUATION))
+    df["title_bow"] = df["Title"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set))
     # bodies
-    df["body_bow"] = df["Body"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set, PUNCTUATION))
+    df["body_bow"] = df["Body"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set))
     # suppression des lignes vides
     df = df.loc[
         (df["title_bow"].apply(lambda x: x.strip() != ""))

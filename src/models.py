@@ -431,35 +431,26 @@ def bert_w_emb(
     return X_bert_pt
 
 
-def eval_stability(X_train, y_train, X_test_list, y_test_list) -> dict:
+def eval_stability(lr_model, X_test_list, y_test_list) -> dict:
     """Train W2V model from preprocessed train data and test samples list"""
     start_time = time.time()
     probas_list = []
     predictions_list = []
-    metric_tag_cover = []
     metric_jaccard = []
-
-    # train classifier
-    logging.info(f"⚙️ Training classifier...")
-    logreg = LogisticRegression(multi_class="ovr")
-    logreg.fit(X_train, y_train)
-    logging.info(f"✅ Training done")
+    metric_tag_cover = []
 
     # loop over test samples
     for i, X_test in enumerate(X_test_list):
-        logging.info(f"Step {i+1}:")
         
         # predict
-        logging.info(f"\t⚙️ Predicting...")
-        predicted_probas = logreg.predict_proba(X_test)
-        lr_preds = lr_predict_tags(logreg, X_test)
+        predicted_probas = lr_model.predict_proba(X_test)
+        lr_preds = lr_predict_tags(lr_model, X_test)
+        logging.info(f"⚙️ Step {i+1}: {len(lr_preds)} predictions")
         # store
         probas_list.append(predicted_probas)
         predictions_list.append(lr_preds)
-        logging.info(f"\t✅ {len(lr_preds)} predictions")
 
         # score
-        logging.info(f"\t⚙️ Scoring...")
         y = y_test_list[i]
         # tags cover
         preds_list = [x.split(" ") for x in lr_preds]
@@ -471,14 +462,14 @@ def eval_stability(X_train, y_train, X_test_list, y_test_list) -> dict:
         # store
         metric_tag_cover.append(score_tc)
         metric_jaccard.append(score_j)
-        logging.info(f"\t✅ Scores: tag cover {score_tc}, Jaccard {score_j}\n")
+
+        logging.info(f"\t➡️ tag cover {score_tc}, Jaccard {score_j}\n")
 
     # duration
     duration = np.round(time.time() - start_time, 0)
     logging.info(f"⏱️ Total duration: {duration}s")
 
     results = {
-        "model": logreg,
         "lr_predictions": predictions_list,
         "lr_probas": probas_list,
         "tag_cover_scores": metric_tag_cover,
