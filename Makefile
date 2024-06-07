@@ -2,7 +2,7 @@ install:
 	pip install --upgrade pip && pip install -r requirements.txt
 
 lint:
-	pylint --disable=R,C,logging-fstring-interpolation,f-string-without-interpolation src/*.py
+	pylint --disable=R,C,logging-fstring-interpolation,f-string-without-interpolation --fail-under=7.0 src/*.py
 
 test:
 	# --cov=my_function test_*.py for details on a function
