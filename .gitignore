@@ -167,3 +167,6 @@ mlruns/
 
 # Data
 data/
+
+# Models
+models/
