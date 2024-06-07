@@ -5,13 +5,15 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
+import plotly.graph_objects as go
+
 from Levenshtein import ratio
 from sklearn.manifold import TSNE
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.linear_model import LogisticRegression
-import torch
 from sklearn.metrics import jaccard_score
 from sklearn.model_selection import train_test_split
+import torch
 
 
 def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True, width=8) -> dict:
@@ -478,6 +480,24 @@ def eval_stability(lr_model, X_test_list, y_test_list) -> dict:
     }
 
     return results
+
+
+def plot_stability(X_data, y_1, y_2, X_title="X", y_1_title="y_1", y_2_title="y_2", width=600, height=400) -> go.Figure:
+    """Plot stability results"""
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=X_data, y=y_1, mode="lines+markers", name=y_1_title))
+    fig.add_trace(go.Scatter(x=X_data, y=y_2, mode="lines+markers", name=y_2_title))
+    fig.update_layout(
+        title=f"Stability: metrics by {X_title}",
+        xaxis_title=X_title,
+        yaxis_title="metrics",
+        width=width,
+        height=height,
+        margin=dict(l=50, r=50, b=50, t=50, pad=0),
+    )
+    fig.show()
+
+    return fig
 
 
 if __name__ == "__main__":
