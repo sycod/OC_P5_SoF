@@ -16,7 +16,9 @@ from sklearn.model_selection import train_test_split
 import torch
 
 
-def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True, width=8) -> dict:
+def eval_lda_n_topics(
+    random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot=True, width=8
+) -> dict:
     """Evaluate LDA model perplexity for multiple number of topics (lower is better)"""
     perplexities = []
 
@@ -32,7 +34,7 @@ def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot
         lda.fit(data)
         p = lda.perplexity(data)
         logging.info(f"\t{p}")
-        
+
         perplexities.append(p)
 
     if plot:
@@ -43,16 +45,16 @@ def eval_lda_n_topics(random_state, data, n_list=[10, 20, 30, 40, 50, 100], plot
         ax.set_ylim(min(y_) * 0.9, max(y_) * 1.1)
 
         ax.bar(x_, y_, width=width)
-        ax.bar_label(ax.containers[0], label_type='edge')
+        ax.bar_label(ax.containers[0], label_type="edge")
 
-        ax.plot(x_, y_, marker='o', color='red')
+        ax.plot(x_, y_, marker="o", color="red")
 
         # Adding labels and title
-        plt.xlabel('Number of topics')
-        plt.ylabel('Perplexity')
-        plt.title('Number of topics: perplexities plot')
+        plt.xlabel("Number of topics")
+        plt.ylabel("Perplexity")
+        plt.title("Number of topics: perplexities plot")
         plt.show()
-    
+
     return dict(zip(n_list, perplexities))
 
 
@@ -64,7 +66,7 @@ def score_terms(pred_words, target_words, cutoff=0.7) -> float:
     score = np.round(score / len(target_words), 3)
 
     return score
-    
+
 
 def results_from_vec_matrix(words_list, X, n_max=5) -> dict:
     """Predict a maximum of n_max results from a vectorized transformed sparse matrix X."""
@@ -95,8 +97,8 @@ def get_5_tags_from_matrix(words_list, X, n_max=5) -> list:
 
 def get_5_tags_from_array(words_list, X, n_max=5) -> list:
     """Predict a maximum of n_max words from an array."""
-    preds = words_list[np.argsort(X)[-min(len(X), n_max):][::-1]].tolist()
-    
+    preds = words_list[np.argsort(X)[-min(len(X), n_max) :][::-1]].tolist()
+
     return preds
 
 
@@ -113,18 +115,22 @@ def score_reduce(words_list, X, y, model=None, model_type=None) -> tuple:
     else:
         X_results = [get_5_tags_from_matrix(words_list, xi) for xi in X]
 
-    scores = [score_terms(p_w, y[y.index[i]].split(" ")) for i, p_w in enumerate(X_results)]
+    scores = [
+        score_terms(p_w, y[y.index[i]].split(" ")) for i, p_w in enumerate(X_results)
+    ]
     model_score = np.round(np.mean(scores), 3)
 
     # reduce dimensions
     # TSNE random init used instead of PCA because sparse matrix can't use PCA
-    tsne = TSNE(n_components=2, perplexity=50, max_iter=2000, init='random', random_state=42)
+    tsne = TSNE(
+        n_components=2, perplexity=50, max_iter=2000, init="random", random_state=42
+    )
     X_tsne = tsne.fit_transform(X)
 
-    duration = np.round(time.time() - start_time,0)
+    duration = np.round(time.time() - start_time, 0)
 
     logging.info(f"Score: {model_score} - Duration: {duration}")
-    
+
     return model_score, X_results, scores, X_tsne
 
 
@@ -141,12 +147,12 @@ def get_topics(model, feature_names, n_top_words) -> list:
     return topics
 
 
-def plot_model(model_score, scores, X_tsne) :
+def plot_model(model_score, scores, X_tsne):
     """Scores & TSNE plotting"""
-    fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
+    fig, axs = plt.subplots(1, 2, figsize=(9, 4), tight_layout=True)
 
     # T-SNE DATA
-    scatter = axs[0].scatter(X_tsne[:,0], X_tsne[:,1], c=scores, cmap='viridis')    
+    scatter = axs[0].scatter(X_tsne[:, 0], X_tsne[:, 1], c=scores, cmap="viridis")
     axs[0].set_title("T-SNE representation")
 
     # SCORES
@@ -159,18 +165,18 @@ def plot_model(model_score, scores, X_tsne) :
         color = plt.cm.viridis(norm(thisfrac))
         thispatch.set_facecolor(color)
     axs[1].set_title(f"Score: {model_score}")
-    axs[1].set_xlabel('Score')
-    axs[1].set_ylabel('Count')
+    axs[1].set_xlabel("Score")
+    axs[1].set_ylabel("Count")
 
     plt.show()
 
 
-def plot_topic_model(model_score, scores, X_tsne, top_topics) :
+def plot_topic_model(model_score, scores, X_tsne, top_topics):
     """Scores & TSNE plotting with color by topic"""
-    fig, axs = plt.subplots(1, 2, figsize=(9,4), tight_layout=True)
+    fig, axs = plt.subplots(1, 2, figsize=(9, 4), tight_layout=True)
 
     # T-SNE DATA
-    scatter = axs[0].scatter(X_tsne[:,0], X_tsne[:,1], c=top_topics, cmap='viridis')    
+    scatter = axs[0].scatter(X_tsne[:, 0], X_tsne[:, 1], c=top_topics, cmap="viridis")
     axs[0].set_title(f"T-SNE representation")
 
     # SCORES
@@ -183,8 +189,8 @@ def plot_topic_model(model_score, scores, X_tsne, top_topics) :
         color = plt.cm.viridis(norm(thisfrac))
         thispatch.set_facecolor(color)
     axs[1].set_title(f"Score: {model_score}")
-    axs[1].set_xlabel('Score')
-    axs[1].set_ylabel('Count')
+    axs[1].set_xlabel("Score")
+    axs[1].set_ylabel("Count")
 
     plt.show()
 
@@ -195,7 +201,9 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> t
 
     # tags cover scores
     preds_list = [x.split(" ") for x in preds]
-    tc_scores = [score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)]
+    tc_scores = [
+        score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)
+    ]
     tc_score = np.round(np.mean(tc_scores), 3)
 
     # jaccard scores
@@ -204,20 +212,22 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> t
 
     if time_it:
         duration = np.round(time.time() - start_time, 0)
-        print(f"Tag cover score: {tc_score} - Jaccard score: {j_score} - Duration: {duration}")
+        print(
+            f"Tag cover score: {tc_score} - Jaccard score: {j_score} - Duration: {duration}"
+        )
     else:
         print(f"Tag cover score: {tc_score} - Jaccard score: {j_score}")
-    
+
     if plot:
         # reduce dimensions
-        tsne = TSNE(n_components=2, perplexity=50, max_iter=2000, init='pca')
+        tsne = TSNE(n_components=2, perplexity=50, max_iter=2000, init="pca")
         X_tsne = tsne.fit_transform(X)
 
-        fig, axs = plt.subplots(1, 3, figsize=(12,4), tight_layout=True)
+        fig, axs = plt.subplots(1, 3, figsize=(12, 4), tight_layout=True)
         color = j_scores if top_topics is None else top_topics
 
         # T-SNE
-        scatter = axs[0].scatter(X_tsne[:,0],X_tsne[:,1], c=color, cmap='viridis')    
+        scatter = axs[0].scatter(X_tsne[:, 0], X_tsne[:, 1], c=color, cmap="viridis")
         axs[0].set_title(f"T-SNE representation")
 
         # TAGS COVER SCORES
@@ -231,8 +241,8 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> t
             color = plt.cm.viridis(norm(thisfrac))
             thispatch.set_facecolor(color)
         axs[1].set_title(f"Tag cover score: {tc_score}")
-        axs[1].set_xlabel('Tag cover score')
-        axs[1].set_ylabel('Count')
+        axs[1].set_xlabel("Tag cover score")
+        axs[1].set_ylabel("Count")
 
         # JACCARD SCORES
         N, bins, patches = axs[2].hist(j_scores, bins=10)
@@ -245,13 +255,13 @@ def score_plot_model(preds, X, y, plot=True, top_topics=None, time_it=True) -> t
             color = plt.cm.viridis(norm(thisfrac))
             thispatch.set_facecolor(color)
         axs[2].set_title(f"Jaccard score: {j_score}")
-        axs[2].set_xlabel('Jaccard score')
-        axs[2].set_ylabel('Count')
+        axs[2].set_xlabel("Jaccard score")
+        axs[2].set_ylabel("Count")
 
         plt.show()
 
     return tc_score, j_score, tc_scores, j_scores
-        
+
 
 def lr_predict_tags(model, X, n_tags=5) -> list:
     """Use logistic regression probabilities to get at least n predicted tags"""
@@ -261,7 +271,11 @@ def lr_predict_tags(model, X, n_tags=5) -> list:
 
     for i, x in enumerate(X):
         # create list of tags from n first classes
-        pred_list = (" ").join([classes[c] for c in ppbs[i].argsort()[: -n_tags - 1 : -1]]).split(" ")
+        pred_list = (
+            (" ")
+            .join([classes[c] for c in ppbs[i].argsort()[: -n_tags - 1 : -1]])
+            .split(" ")
+        )
         # keep only 5 first tags
         pred = set()
         j = 0
@@ -291,18 +305,20 @@ def score_jaccard(y_true, y_pred) -> float:
             pred_labels.append("0")
         i += 1
 
-    j_score = jaccard_score(y_true, pred_labels, average='weighted')
+    j_score = jaccard_score(y_true, pred_labels, average="weighted")
 
     return j_score
 
 
-def select_split_data(df, random_state=42, test_size=1000, start_date=None, end_date=None) -> tuple:
+def select_split_data(
+    df, random_state=42, test_size=1000, start_date=None, end_date=None
+) -> tuple:
     """Prepare splitted and eventually date-windowed data from a preprocessed dataframe"""
     # ceil / floor data from date
     if start_date:
-        df = df.loc[(df['date'] >= start_date)]
+        df = df.loc[(df["date"] >= start_date)]
     if end_date:
-        df = df.loc[(df['date'] < end_date)]
+        df = df.loc[(df["date"] < end_date)]
 
     # select columns
     df = df[["doc_bow", "tags"]]
@@ -364,7 +380,12 @@ def evaluate_model(data, vocab=None, n_topics=5, random_state=42, plot=True) -> 
     # score
     logging.info(f"Scoring...")
     score_tc, score_j, scores_tc, scores_j = score_plot_model(
-        lr_preds, predicted_probas, y_test, top_topics=top_topics_test, time_it=False, plot=plot,
+        lr_preds,
+        predicted_probas,
+        y_test,
+        top_topics=top_topics_test,
+        time_it=False,
+        plot=plot,
     )
 
     # duration
@@ -443,7 +464,7 @@ def eval_stability(lr_model, X_test_list, y_test_list) -> dict:
 
     # loop over test samples
     for i, X_test in enumerate(X_test_list):
-        
+
         # predict
         predicted_probas = lr_model.predict_proba(X_test)
         lr_preds = lr_predict_tags(lr_model, X_test)
@@ -456,10 +477,15 @@ def eval_stability(lr_model, X_test_list, y_test_list) -> dict:
         y = y_test_list[i]
         # tags cover
         preds_list = [x.split(" ") for x in lr_preds]
-        tc_scores = [score_terms(p_w, y.to_list()[i].split(" ")) for i, p_w in enumerate(preds_list)]
+        tc_scores = [
+            score_terms(p_w, y.to_list()[i].split(" "))
+            for i, p_w in enumerate(preds_list)
+        ]
         score_tc = np.round(np.mean(tc_scores), 3)
         # jaccard
-        j_scores = [score_jaccard(p_w, y.to_list()[i]) for i, p_w in enumerate(lr_preds)]
+        j_scores = [
+            score_jaccard(p_w, y.to_list()[i]) for i, p_w in enumerate(lr_preds)
+        ]
         score_j = np.round(np.mean(j_scores), 3)
         # store
         metric_tag_cover.append(score_tc)
@@ -482,7 +508,16 @@ def eval_stability(lr_model, X_test_list, y_test_list) -> dict:
     return results
 
 
-def plot_stability(X_data, y_1, y_2, X_title="X", y_1_title="y_1", y_2_title="y_2", width=600, height=400) -> go.Figure:
+def plot_stability(
+    X_data,
+    y_1,
+    y_2,
+    X_title="X",
+    y_1_title="y_1",
+    y_2_title="y_2",
+    width=600,
+    height=400,
+) -> go.Figure:
     """Plot stability results"""
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=X_data, y=y_1, mode="lines+markers", name=y_1_title))

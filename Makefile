@@ -2,7 +2,7 @@ install:
 	pip install --upgrade pip && pip install -r requirements.txt
 
 lint:
-	pylint --disable=R,C *.py
+	pylint --disable=R,C,logging-fstring-interpolation,f-string-without-interpolation src/*.py
 
 test:
 	# --cov=my_function test_*.py for details on a function
@@ -15,6 +15,6 @@ test:
 
 format:
 	# --force-exclude '<FILE_OR_FOLDER>' if needed (env, imported, models...)
-	black *.py *.ipynb
+	black src/*.py *.ipynb
 
 all: install lint test format

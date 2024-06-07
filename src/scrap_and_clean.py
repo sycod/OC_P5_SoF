@@ -3,7 +3,7 @@
 import os
 from dotenv import load_dotenv
 import dill as pickle
-import urllib.request, json 
+import urllib.request, json
 import pandas as pd
 import re
 from html.parser import HTMLParser
@@ -19,6 +19,7 @@ logger.setLevel(logging.DEBUG)
 
 class LangParser(HTMLParser):
     """Parse names from an extracted HTML"""
+
     def __init__(self):
         HTMLParser.__init__(self)
         self.recording = 0
@@ -37,7 +38,7 @@ class LangParser(HTMLParser):
             # avoid adding edit links
             if data.strip() != "edit":
                 # remove everything between parentheses
-                data = re.sub(r'\([^)]*\)', '', data)
+                data = re.sub(r"\([^)]*\)", "", data)
                 # remove start & end white spaces + convert to lower case
                 data = data.strip().lower()
                 self.data.add(data)
@@ -83,7 +84,7 @@ def get_languages() -> set:
     parser = LangParser()
     parser.feed(scrap)
     prog_langs = set(parser.data)
-    
+
     return prog_langs
 
 
@@ -96,7 +97,7 @@ def clean_string(string) -> str:
     # remove all html tags
     string = re.sub(r"<.*?>", "", string)
     # remove emojis
-    string = emoji.replace_emoji(string, replace=' ')
+    string = emoji.replace_emoji(string, replace=" ")
     # remove newlines
     string = re.sub(r"\n", " ", string)
     # lowercase
@@ -119,10 +120,10 @@ def clean_hashes(tokens, keep_set) -> list:
     i_offset = 0
     for i, t in enumerate(tokens):
         i -= i_offset
-        if t == '#' and i > 0:
-            left = tokens[:i-1]
+        if t == "#" and i > 0:
+            left = tokens[: i - 1]
             joined = [tokens[i - 1] + t]
-            right = tokens[i + 1:]
+            right = tokens[i + 1 :]
             if joined[0] in keep_set:
                 tokens = left + joined + right
                 i_offset += 1
@@ -132,8 +133,8 @@ def clean_hashes(tokens, keep_set) -> list:
 
 def tokenize_str(sentence, keep_set, exclude_set) -> list:
     """Return a list of cleansed tokens from a string,  excluding some words"""
-    # tokenize except excluded 
-    nltk.download('punkt')  # downloaded just once, either checks update
+    # tokenize except excluded
+    nltk.download("punkt")  # downloaded just once, either checks update
     tokens = nltk.word_tokenize(sentence)
 
     # remove hashes from watch list
@@ -143,7 +144,9 @@ def tokenize_str(sentence, keep_set, exclude_set) -> list:
     tokens_rm_inf3 = [t for t in tokens if len(t) > 2 or t in keep_set]
 
     # remove tokens containing absolutely no letter
-    tokens_rm_no_letter = list(filter(lambda s:any([c.isalpha() for c in s]), tokens_rm_inf3))
+    tokens_rm_no_letter = list(
+        filter(lambda s: any([c.isalpha() for c in s]), tokens_rm_inf3)
+    )
 
     # remove remaining excluded words
     tokens_cleaned = [t for t in tokens_rm_no_letter if t not in exclude_set]
@@ -153,7 +156,7 @@ def tokenize_str(sentence, keep_set, exclude_set) -> list:
 
 def lemmatize_tokens(tokens_list, keep_set, exclude_set) -> list:
     """Return lemmatized tokens from a tokens list, on conditions"""
-    nltk.download('wordnet')    # downloaded just once, either checks update
+    nltk.download("wordnet")  # downloaded just once, either checks update
     kilmister = nltk.wordnet.WordNetLemmatizer()
     lem_tok_list = []
 
@@ -220,10 +223,151 @@ def preprocess_data(df_raw, tags_n_min=10) -> pd.DataFrame:
     """Return a preprocessed dataframe from a raw dataframe"""
     df = df_raw.copy()
 
-    PUNCTUATION = ["'", '"', ",", ".", ";", ":", "?", "!", "+", "..", "''", "``", "||", "\\\\", "\\", "==", "+=", "-=", "-", "_", "=", "(", ")", "[", "]", "{", "}", "<", ">", "/", "|", "&", "*", "%", "$", "#", "@", "`", "^", "~"]
+    PUNCTUATION = [
+        "'",
+        '"',
+        ",",
+        ".",
+        ";",
+        ":",
+        "?",
+        "!",
+        "+",
+        "..",
+        "''",
+        "``",
+        "||",
+        "\\\\",
+        "\\",
+        "==",
+        "+=",
+        "-=",
+        "-",
+        "_",
+        "=",
+        "(",
+        ")",
+        "[",
+        "]",
+        "{",
+        "}",
+        "<",
+        ">",
+        "/",
+        "|",
+        "&",
+        "*",
+        "%",
+        "$",
+        "#",
+        "@",
+        "`",
+        "^",
+        "~",
+    ]
 
     # updated from multiple trials → list differs from the EDA notebook list
-    EXCLUDED_TERMS = ["can't", "d'oh", "could't", "could'nt", "cound't", "cound'nt", "coulnd't", "cdn'ed", "doesn'it", "does't", "don'ts", "n't", "'nt", "i'ca", "i'ts", "should't", "want", "would", "would't", "might't", "must't", "need't", "n'th", "wont't", "non", "no", "use", "using", "usage", "code", "like", "issue", "error", "file", "files", "run", "runs", "create", "created", 'between', 't', 'any', 'using', 'this', 'out', 'm', 'file', 'each', 's', "'ve", "work", "way", "following", "problem", "tried", "also", "need", "trying", "example", "question", "value", "know", "application", "see", "new", "could", "however", "working", "change", "something", "used", "found", "result", "help", "quot", "running", "first", "seems", "without", "different", "two", "still", "look", "possible", "getting", "able", "even", "fine", "instead", "library", "answer", "another", "thanks", "read", "since", "inside", "idea", "every", "added"]
+    EXCLUDED_TERMS = [
+        "can't",
+        "d'oh",
+        "could't",
+        "could'nt",
+        "cound't",
+        "cound'nt",
+        "coulnd't",
+        "cdn'ed",
+        "doesn'it",
+        "does't",
+        "don'ts",
+        "n't",
+        "'nt",
+        "i'ca",
+        "i'ts",
+        "should't",
+        "want",
+        "would",
+        "would't",
+        "might't",
+        "must't",
+        "need't",
+        "n'th",
+        "wont't",
+        "non",
+        "no",
+        "use",
+        "using",
+        "usage",
+        "code",
+        "like",
+        "issue",
+        "error",
+        "file",
+        "files",
+        "run",
+        "runs",
+        "create",
+        "created",
+        "between",
+        "t",
+        "any",
+        "using",
+        "this",
+        "out",
+        "m",
+        "file",
+        "each",
+        "s",
+        "'ve",
+        "work",
+        "way",
+        "following",
+        "problem",
+        "tried",
+        "also",
+        "need",
+        "trying",
+        "example",
+        "question",
+        "value",
+        "know",
+        "application",
+        "see",
+        "new",
+        "could",
+        "however",
+        "working",
+        "change",
+        "something",
+        "used",
+        "found",
+        "result",
+        "help",
+        "quot",
+        "running",
+        "first",
+        "seems",
+        "without",
+        "different",
+        "two",
+        "still",
+        "look",
+        "possible",
+        "getting",
+        "able",
+        "even",
+        "fine",
+        "instead",
+        "library",
+        "answer",
+        "another",
+        "thanks",
+        "read",
+        "since",
+        "inside",
+        "idea",
+        "every",
+        "added",
+    ]
 
     # KEPT TOKENS SET
     # tags
@@ -239,16 +383,20 @@ def preprocess_data(df_raw, tags_n_min=10) -> pd.DataFrame:
     keep_set |= set(add_spec_terms)
 
     # EXCLUDED TOKENS SET
-    nltk.download('stopwords')  # downloaded just once, either checks update
+    nltk.download("stopwords")  # downloaded just once, either checks update
     exclude_set = set(nltk.corpus.stopwords.words("english"))
     exclude_set |= set(PUNCTUATION)
     exclude_set |= set(EXCLUDED_TERMS)
 
     # PREPROCESSING
     # titles
-    df["title_bow"] = df["Title"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set))
+    df["title_bow"] = df["Title"].apply(
+        lambda x: preprocess_doc(x, keep_set, exclude_set)
+    )
     # bodies
-    df["body_bow"] = df["Body"].apply(lambda x: preprocess_doc(x, keep_set, exclude_set))
+    df["body_bow"] = df["Body"].apply(
+        lambda x: preprocess_doc(x, keep_set, exclude_set)
+    )
     # suppression des lignes vides
     df = df.loc[
         (df["title_bow"].apply(lambda x: x.strip() != ""))
@@ -258,7 +406,7 @@ def preprocess_data(df_raw, tags_n_min=10) -> pd.DataFrame:
     df["doc_bow"] = df["title_bow"] + " " + df["body_bow"]
 
     # explode DF by tag
-    df_exploded = df.explode('Tags')
+    df_exploded = df.explode("Tags")
 
     # count tags and keep only those with at least 10 occurrences
     vc = df_exploded.Tags.value_counts()
@@ -302,4 +450,3 @@ def init_data():
 
 if __name__ == "__main__":
     help()
-    
