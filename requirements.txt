@@ -20,6 +20,7 @@ scikit-learn        # ML must-have library
 stackapi            # StackOverflow API
 notebook            # Jupyter notebook
 nltk                # Natural Language Toolkit
+streamlit           # api utilities
 tensorflow_hub      # ML models from TensorFlow hub
 torch               # DL
 transformers        # ML models from Hugging Face
