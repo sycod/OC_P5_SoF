@@ -21,6 +21,7 @@ stackapi            # StackOverflow API
 notebook            # Jupyter notebook
 nltk                # Natural Language Toolkit
 streamlit           # api utilities
+streamlit-tags      # same for tags
 tensorflow_hub      # ML models from TensorFlow hub
 torch               # DL
 transformers        # ML models from Hugging Face
