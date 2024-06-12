@@ -4,17 +4,12 @@ import os
 import dill as pickle
 import logging
 import streamlit as st
-from streamlit_tags import st_tags
-
-# ML
 from gensim.models import Word2Vec
 import nltk
 
 # home made
 from src.api_utils import check_length
 from src.api_utils import preprocess_doc
-from src.api_utils import w2v_vect_data
-from src.api_utils import lr_prediction
 from src.api_utils import predict_tags
 
 
@@ -28,8 +23,8 @@ nltk.download('wordnet', quiet=True)
 # ML tools
 VECTORIZER_URI = "models/w2v_cbow_vectorizer"
 CLASSIFIER_URI = "models/w2v_cbow_lrovr_classifier.pkl"
-KEEP_SET_URI = "config/keep_set.pkl"
-EXCLUDE_SET_URI = "config/exclude_set.pkl"
+KEEP_SET_URI = "data/keep_set.pkl"
+EXCLUDE_SET_URI = "data/exclude_set.pkl"
 # placeholders
 TITLE_PLACEHOLDER = "example: pandas merge with Python >3.5"
 BODY_PLACEHOLDER = """example:
@@ -93,13 +88,17 @@ if "message" not in st.session_state:
 # update session state on inputs
 def update_title():
     st.session_state.title_input = st.session_state.title
+
+
 def update_body():
     st.session_state.body_input = st.session_state.body
+
 
 # main function, triggered with button
 def click_button():
     """Actions to perform when button clicked"""
     user_input = st.session_state.title_input + "\n" + st.session_state.body_input
+    logging.info(f"\nUser input: {user_input}")
 
     # check user input length
     if not check_length(user_input):
@@ -109,24 +108,25 @@ def click_button():
     else:
         # preprocess input
         input_clean = preprocess_doc(
-            user_input,
-            st.session_state.keep_set,
-            st.session_state.exclude_set
+            user_input, st.session_state.keep_set, st.session_state.exclude_set
         )
+        logging.info(f"\nClean input: {input_clean}")
 
         # check preprocessed input length before predict
         if not check_length(input_clean):
             logging.warning(f"⚠️  Length is too short after preprocessing: check input")
             st.session_state.predicted_tags = None
-            st.session_state.message = "⚠️  Length is too short after preprocessing: check input"
+            st.session_state.message = (
+                "⚠️  Length is too short after preprocessing: check input"
+            )
         else:
             # predict tags
-            predicted_tags = predict_tags(user_input, st.session_state.vectorizer, st.session_state.classifier)
+            predicted_tags = predict_tags(
+                input_clean, st.session_state.vectorizer, st.session_state.classifier
+            )
             st.session_state.predicted_tags = predicted_tags
 
         # log infos
-        logging.info(f"\nUser input: {user_input}")
-        logging.info(f"\nClean input: {input_clean}")
         logging.info(f"\nPredicted tags: {st.session_state.predicted_tags}")
 
     return st.session_state.predicted_tags
@@ -134,28 +134,46 @@ def click_button():
 
 # GUI
 st.set_page_config(
-    page_title="Get tags from where you once asked for",
-    page_icon="api_favicon.ico",
+    page_title="Get tags (from where you once asked for)",
+    page_icon="favicon.ico",
     layout="centered",
 )
 st.write("# Tags prediction")
-st.write("Predict 5 tags from a StackOverflow-like question title and / or body) fields:")
+st.write(
+    "Predict 5 tags from a StackOverflow-like question title and / or body) fields:"
+)
 
 # user input
-st.text_input("Title", placeholder=TITLE_PLACEHOLDER, key="title", on_change=update_title)
-st.text_area("Body", placeholder=BODY_PLACEHOLDER, height=160, key="body", on_change=update_body)
+st.text_input(
+    "Title", placeholder=TITLE_PLACEHOLDER, key="title", on_change=update_title
+)
+st.text_area(
+    "Body", placeholder=BODY_PLACEHOLDER, height=160, key="body", on_change=update_body
+)
 
 # predictions
-st.button('⬇️  Predict tags  ⬇️', type='primary', use_container_width=True, on_click=click_button)
+st.button(
+    "⬇️  Predict tags  ⬇️",
+    type="primary",
+    use_container_width=True,
+    on_click=click_button,
+)
 # display message if no prediction (e.g. input is too short)
 if st.session_state.predicted_tags is not None:
-    st.write("#### :blue[{}]".format(st.session_state.predicted_tags))    
+    st.write("#### :blue[{}]".format(st.session_state.predicted_tags))
 else:
     st.write("#### :red[{}]".format(st.session_state.message))
 
 # info and tips
 st.divider()
 st.write("## ℹ️ TIPS")
-st.markdown("""- preprocessing discards many **frequent and usual words** plus **HTML tags** and **code snippets** from user sentences and may result to a too small final input.  
-    An error message can thus be displayed.""")
-st.write("- Also note that the **model is trained for english language** input and may result in weird predictions in other cases.")
+st.markdown(
+    """- preprocessing discards many **frequent and usual words** plus **HTML tags** and **code snippets** from user sentences and may result to a too small final input.  
+    An error message can thus be displayed."""
+)
+st.write(
+    "- Also note that the **model is trained for english language** input and may result in weird predictions in other cases."
+)
+st.write(
+    "- If model can't find any of the input words in trained data, it will display a no-suggestion message"
+)

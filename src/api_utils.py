@@ -98,8 +98,9 @@ def w2v_vect_data(model, matrix) -> np.array:
         for token in tokens:
             if token in model.wv:
                 doc_vec.append(model.wv[token])
-        # mean it
-        doc_vectors.append(np.mean(doc_vec, axis=0))
+        if len(doc_vec) >= 1:
+            # mean it
+            doc_vectors.append(np.mean(doc_vec, axis=0))
     # get X_train matrix
     vector_matrix = np.array(doc_vectors)
 
@@ -134,13 +135,17 @@ def lr_prediction(model, X, n_tags=5) -> list:
 def predict_tags(input_clean, vectorizer, classifier) -> str:
     """Predict tags from  an input preprocessed data"""
     X_vect = w2v_vect_data(vectorizer, [input_clean.split(" ")])
-    lr_preds = lr_prediction(classifier, X_vect)
-    predictions = str.join("  ", lr_preds)
-
-    # log infos
     logging.info(f"X shape: {X_vect.shape}")
-    logging.info(f"Vectors:\n{X_vect[0]}")
-    logging.info(f"Predictions: {predictions}")
+
+    if len(X_vect) < 1:
+        return "❌  aucune suggestion"
+    else:
+        lr_preds = lr_prediction(classifier, X_vect)
+        predictions = str.join("  ", lr_preds)
+
+        # log infos
+        logging.info(f"Vectors:\n{X_vect[0]}")
+        logging.info(f"Predictions: {predictions}")
 
     return predictions
 
