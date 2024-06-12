@@ -5,7 +5,6 @@ import dill as pickle
 import logging
 import streamlit as st
 from streamlit_tags import st_tags
-from streamlit_tags import st_tags_sidebar
 
 # ML
 from gensim.models import Word2Vec
