@@ -1,6 +1,6 @@
 # MLOps : note technique
 
-Issue du *DevOps*, la démarche MLOps (*Machine Learning Operating System*) sert à encadrer et automatiser les tâches nécessaires à l'élaboration d'un modèle d'apprentissage automatique, en vue de pouvoir sécuriser et répéter ces étapes et monitorer ses performances, dans un objectif d'amélioration continue.
+Issue du *DevOps*, la démarche MLOps (*Machine Learning Operations*) sert à encadrer et automatiser les tâches nécessaires à l'élaboration d'un modèle d'apprentissage automatique, en vue de pouvoir sécuriser et répéter ces étapes et monitorer ses performances, dans un objectif d'amélioration continue.
 
 ## Démarche CI/CD
 
